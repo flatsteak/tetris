@@ -13,14 +13,14 @@ class CycleIndex {
 	boolean[][] left;
 	boolean[][] right;
 	boolean[][] flip;
-	
+
 	CycleIndex(boolean[][] n, boolean[][] l, boolean[][] r, boolean[][] f) {
 		this.first = n;
 		this.left = l;
 		this.right = r;
 		this.flip = f;
 	}
-	
+
 	void cycleRight() {
 		boolean[][] rotfirst = this.first.clone();
 		boolean[][] rotleft = this.left.clone();
@@ -55,13 +55,29 @@ abstract class APiece {
 	Posn position;
 	CycleIndex piece;
 	Tetrimino identity;
-	
+
 	APiece(Posn posn, CycleIndex rotations, Tetrimino identity) {
 		this.position = posn;
 		this.piece = rotations;
 		this.identity = identity;
 	}
-	
+
+	int getEmptyLineCount() {
+		for (int i = 3; i >= 0; i -= 1) {
+			boolean foundFilled = false;
+			for (int j = 0; j < 4; j += 1) {
+				if (this.piece.first[i][j]) {
+					foundFilled = true;
+					break;
+				}
+			}
+			if (foundFilled) {
+				return 3 - i;
+			}
+		}
+		throw new RuntimeException("Impossible piece");
+	}
+
 	void rotate(Rotation r) {
 		if (r.equals(Rotation.CLOCKWISE)) {
 			this.piece.cycleRight();
@@ -75,8 +91,8 @@ abstract class APiece {
 			this.piece.cycleFlip();
 		}
 	}
-	
-	
+
+
 	boolean checkOverlap(Board b, boolean[][] posns, Posn shift) {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
@@ -87,21 +103,21 @@ abstract class APiece {
 		}
 		return false;
 	}
-	
+
 	void moveLeft(Board b) {
 		Posn shift = new Posn(-1, 0);
 		if (!checkOverlap(b, this.piece.first, shift)) {
 			this.position = new Posn(this.position.x - 1, this.position.y);
 		}
 	}
-	
+
 	void moveRight(Board b) {
 		Posn shift = new Posn(1, 0);
 		if (!checkOverlap(b, this.piece.first, shift)) {
 			this.position = new Posn(this.position.x + 1, this.position.y);
 		}
 	}
-	
+
 	void softDrop(Board b) {
 		Posn shift = new Posn(0, 1);
 		if (!checkOverlap(b, this.piece.first, shift)) {
@@ -109,29 +125,33 @@ abstract class APiece {
 			this.position = new Posn(this.position.x, this.position.y + 1);
 		}
 	}
-	
+
 	void hardDrop(Board b) {
 		for (int i = this.position.y; i < b.height; i++) {
-			if (this.checkOverlap(b, this.piece.first, new Posn(0, 1))) {
+			if (this.checkOverlap(b, this.piece.first, new Posn(0, i - this.position.y + 1))) {
 				System.out.println("placed");
 				this.position = new Posn(this.position.x, i);
 				b.placePiece(this);
 				return;
 			}
 		}
-		this.position = new Posn(this.position.x, b.height - 1);
+		// Place it at the bottom of the board, which is b.height - 1, but adjusted for the piece
+		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCount());
 		b.placePiece(this);
 	}
-	
-	
+
+
 	public abstract boolean hasSpun(Board b);
-	
-	
+
+
 	public void drawPiece(Theme t, WorldScene s, WorldImage cell) {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
 				if (this.piece.first[i][j]) {
-					s.placeImageXY(cell, (j + this.position.x) * Board.CELL_SIZE, (i + this.position.y) * Board.CELL_SIZE + Board.CELL_SIZE / 2);
+					s.placeImageXY(
+						cell,
+						(j + this.position.x) * Board.CELL_SIZE + Board.CELL_SIZE / 2,
+						(i + this.position.y) * Board.CELL_SIZE + Board.CELL_SIZE / 2);
 				}
 			}
 		}

@@ -6,7 +6,7 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/Users/felix/Downloads/javalib.jar"/>
-	<classpathentry kind="lib" path="/Users/felix/Downloads/tester.jar"/>
+	<classpathentry kind="lib" path="./javalib.jar"/>
+	<classpathentry kind="lib" path="./tester.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
