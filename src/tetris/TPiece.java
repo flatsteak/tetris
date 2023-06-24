@@ -33,18 +33,33 @@ public class TPiece extends APiece {
 		{ false, false, false, false }
 	};
 	
-	static CycleIndex TPIECE_ROTATIONS = new CycleIndex(TPIECE_UP, TPIECE_LEFT, TPIECE_RIGHT, TPIECE_DOWN);
 
 	TPiece(Posn posn) {
-		super(posn, TPIECE_ROTATIONS, Tetrimino.T);
+		super(posn, new CycleIndex(TPIECE_UP.clone(), TPIECE_LEFT.clone(), TPIECE_RIGHT.clone(), TPIECE_DOWN.clone()), Tetrimino.T);
 	}
 
 	
 	public boolean hasSpun(Board b) {
-		Residue[] bottom = b.residue.get(this.position.y);
-		Residue[] top = b.residue.get(this.position.y + 2);
-		return !(top[this.position.x].equals(Residue.EMPTY) && top[this.position.x + 2].equals(Residue.EMPTY)) &&
-				!(bottom[this.position.x].equals(Residue.EMPTY) || bottom[this.position.x].equals(Residue.EMPTY));
+		Residue[] top = b.residue.get(this.position.y);
+		Residue[] bottom = b.residue.get(this.position.y + 2);
+		
+		if (this.position.x + 2 > 9 || this.position.x < 0) {
+			return false;
+		}
+		boolean topBlockPresent = !top[this.position.x].equals(Residue.EMPTY) || !top[this.position.x + 2].equals(Residue.EMPTY);
+		System.out.println(topBlockPresent);
+		boolean bottomBlockPresent = !bottom[this.position.x].equals(Residue.EMPTY) && !bottom[this.position.x + 2].equals(Residue.EMPTY);
+		System.out.println(bottomBlockPresent);
+		return topBlockPresent && bottomBlockPresent;
+	}
+	
+	public boolean[][] rotInitialState(String s) {
+		switch (s) {
+		case "up": return TPIECE_UP;
+		case "left": return TPIECE_LEFT;
+		case "right": return TPIECE_RIGHT;
+		default: return TPIECE_DOWN;
+		}
 	}
 
 }

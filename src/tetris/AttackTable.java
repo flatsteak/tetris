@@ -18,8 +18,33 @@ class AttackTable {
 			new Double<Integer, Boolean>(3, true), 6);
 
 	
+	static int getLinesSent(Double<Integer, Boolean> clear) {
+		if (clear.first == 4) {
+			return 4;
+		}
+		if (clear.second) {
+			if (clear.first == 1) {
+				new AudioPlayer().play(FilePaths.AUDIO + "tss.wav");
+			} else if (clear.first == 2) {
+				new AudioPlayer().play(FilePaths.AUDIO + "tsd.wav");
+			} else if (clear.first == 3) {
+				new AudioPlayer().play(FilePaths.AUDIO + "tst.wav");
+			}
+			return clear.first * 2;
+		}
+		return clear.first - 1;
+	}
+	
 	static int applyCombo(int combo, int b2b, Double<Integer, Boolean> clear) {
-		return (int) (table.get(clear) * Math.max(Math.floor(combo / 5), 10)) + AttackTable.b2bFactor(b2b);
+		int baseatk = AttackTable.getLinesSent(clear);
+		int combocap = (clear.first == 1 && !clear.second)? 3 : clear.first * 2;
+		int comboval = (int) Math.min(Math.max(Math.ceil(combo * baseatk / 4.0), 0.25 * combo), combocap);
+		
+		if (clear.first == 4 && b2b > 0) {
+			new AudioPlayer().play(FilePaths.AUDIO + "b2bclearquad.wav");
+		}
+		
+		return baseatk + comboval + Math.max(0, AttackTable.b2bFactor(b2b - 1));
 	}
 	
 	static int b2bFactor(int b2b) {

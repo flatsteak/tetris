@@ -1,8 +1,7 @@
 package tetris;
 
-import java.awt.Color;
-import java.util.Arrays;
-import java.util.Comparator;
+
+import java.util.List;
 
 import javalib.impworld.WorldScene;
 import javalib.worldimages.Posn;
@@ -55,7 +54,9 @@ abstract class APiece {
 	Posn position;
 	CycleIndex piece;
 	Tetrimino identity;
-
+	
+	
+	
 	APiece(Posn posn, CycleIndex rotations, Tetrimino identity) {
 		this.position = posn;
 		this.piece = rotations;
@@ -126,10 +127,40 @@ abstract class APiece {
 		}
 	}
 
+	
+	void softDropInf(Board b) {
+		for (int i = this.position.y; i < b.height; i++) {
+			if (this.checkOverlap(b, this.piece.first, new Posn(0, i - this.position.y + 1))) {
+				this.position = new Posn(this.position.x, i);
+				return;
+			}
+		}
+		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCount());
+	}
+	
+	void moveLeftInf(Board b) {
+		for (int i = 0; i < this.position.x; i++) {
+			if (this.checkOverlap(b, this.piece.first, new Posn(-i, 0))) {
+				this.position = new Posn(i, this.position.y);
+				return;
+			}
+		}
+		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCount());
+	}
+	
+	void moveRightInf(Board b) {
+		for (int i = this.position.x; i < b.width; i++) {
+			if (this.checkOverlap(b, this.piece.first, new Posn(i - this.position.x + 1, 0))) {
+				this.position = new Posn(i, this.position.y);
+				return;
+			}
+		}
+		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCount());
+	}
+	
 	void hardDrop(Board b) {
 		for (int i = this.position.y; i < b.height; i++) {
 			if (this.checkOverlap(b, this.piece.first, new Posn(0, i - this.position.y + 1))) {
-				System.out.println("placed");
 				this.position = new Posn(this.position.x, i);
 				b.placePiece(this);
 				return;
@@ -138,11 +169,54 @@ abstract class APiece {
 		// Place it at the bottom of the board, which is b.height - 1, but adjusted for the piece
 		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCount());
 		b.placePiece(this);
+		b.pieceplaced = true;
+		
 	}
 
 
 	public abstract boolean hasSpun(Board b);
+	public abstract boolean[][] rotInitialState(String s);
 
+	public List<Posn> getKickTests(Rotation r) {
+		if (this.piece.first == this.rotInitialState("up")) {
+			switch (r) {
+			case CLOCKWISE:
+				return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(-1, -1), new Posn(0, 2), new Posn(-1, 2));
+			case COUNTERCLOCKWISE:
+				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, -1), new Posn(0, 2), new Posn(1, 2));
+			default:
+				return List.of(new Posn(0, 0));
+			}
+		} else if (this.piece.first == this.rotInitialState("right")) {
+			switch (r) {
+			case CLOCKWISE:
+				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, 1), new Posn(0, -2), new Posn(1, 2));
+			case COUNTERCLOCKWISE:
+				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, 1), new Posn(0, -2), new Posn(1, 2));
+			default:
+				return List.of(new Posn(0, 0));
+			}
+		} else if (this.piece.first == this.rotInitialState("left")) {
+			switch (r) {
+			case CLOCKWISE:
+				return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(-1, 1), new Posn(0, 2), new Posn(-1, 2));
+			case COUNTERCLOCKWISE:
+				return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(-1, 1), new Posn(0, 2), new Posn(-1, 2));
+			default:
+				return List.of(new Posn(0, 0));
+			}
+		} else {
+			switch (r) {
+			case CLOCKWISE:
+				return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(-1, -1), new Posn(0, 2), new Posn(-1, 2));
+			case COUNTERCLOCKWISE:
+				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, -1), new Posn(0, 2), new Posn(1, 2));
+			default:
+				return List.of(new Posn(0, 0));
+			}
+		}
+
+	}
 
 	public void drawPiece(Theme t, WorldScene s, WorldImage cell) {
 		for (int i = 0; i < 4; i++) {

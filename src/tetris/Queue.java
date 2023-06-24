@@ -22,6 +22,7 @@ class Queue {
 			toreturn.add(bag.get(rngidx));
 			bag.remove(rngidx);
 		}
+		toreturn.addAll(bag);
 		return toreturn;
 	}
 }
@@ -29,4 +30,5 @@ class Queue {
 enum Tetrimino {
 	S, Z, I, J, L, O, T;
 }
+
 

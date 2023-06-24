@@ -15,8 +15,9 @@ public class Theme {
 	WorldImage cheese;
 	WorldImage empty;
 	WorldImage holdbox;
+	WorldImage shadow;
 	
-	Theme(WorldImage i, WorldImage s, WorldImage z, WorldImage j, WorldImage l, WorldImage o, WorldImage t, WorldImage cheese, WorldImage empty, WorldImage holdbox) {
+	Theme(WorldImage i, WorldImage s, WorldImage z, WorldImage j, WorldImage l, WorldImage o, WorldImage t, WorldImage cheese, WorldImage empty, WorldImage holdbox, WorldImage shadow) {
 		this.i = i;
 		this.s = s;
 		this.z = z;
@@ -27,12 +28,13 @@ public class Theme {
 		this.cheese = cheese;
 		this.empty = empty;
 		this.holdbox = holdbox;
+		this.shadow = shadow;
 	}
 }
 
 class ThemePool {
 	static Theme DEFAULT_THEME = new Theme(
-			new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, new Color(79, 46, 223)), // i
+			new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.BLUE.brighter().brighter()), // i
 			new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.GREEN), // s
 			new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.RED), // z
 			new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.BLUE), // j
@@ -45,12 +47,15 @@ class ThemePool {
 					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.BLACK)),
 			new OverlayImage(
 					new RectangleImage(Board.CELL_SIZE * 4, Board.CELL_SIZE * 3, OutlineMode.OUTLINE, Color.WHITE),
-					new RectangleImage(Board.CELL_SIZE * 4, Board.CELL_SIZE * 3, OutlineMode.SOLID, Color.BLACK)));
+					new RectangleImage(Board.CELL_SIZE * 4, Board.CELL_SIZE * 3, OutlineMode.SOLID, Color.BLACK)),
+			new OverlayImage(
+					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.OUTLINE, Color.WHITE),
+					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.GRAY)));
 	
 	static Theme OUTLINE_THEME = new Theme(
 			new OverlayImage( // i
 					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.OUTLINE, Color.BLACK),
-					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, new Color(79, 46, 223))),
+					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.BLUE.brighter().brighter())),
 			new OverlayImage( // s
 					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.OUTLINE, Color.BLACK),
 					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.GREEN)),
@@ -77,6 +82,9 @@ class ThemePool {
 					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.BLACK)),
 			new OverlayImage(
 					new RectangleImage(Board.CELL_SIZE * 4, Board.CELL_SIZE * 3, OutlineMode.OUTLINE, Color.WHITE),
-					new RectangleImage(Board.CELL_SIZE * 4, Board.CELL_SIZE * 3, OutlineMode.SOLID, Color.BLACK)));
+					new RectangleImage(Board.CELL_SIZE * 4, Board.CELL_SIZE * 3, OutlineMode.SOLID, Color.BLACK)),
+			new OverlayImage(
+					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.OUTLINE, Color.WHITE),
+					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.GRAY)));
 			
 }

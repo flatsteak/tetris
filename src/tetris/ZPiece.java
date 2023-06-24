@@ -34,14 +34,22 @@ public class ZPiece extends APiece {
 		{ false, false, false, false }
 	};
 	
-	static CycleIndex ZPIECE_ROTATIONS = new CycleIndex(ZPIECE_UP, ZPIECE_LEFT, ZPIECE_RIGHT, ZPIECE_DOWN);
 
 	ZPiece(Posn posn) {
-		super(posn, ZPIECE_ROTATIONS, Tetrimino.Z);
+		super(posn, new CycleIndex(ZPIECE_UP.clone(), ZPIECE_LEFT.clone(), ZPIECE_RIGHT.clone(), ZPIECE_DOWN.clone()), Tetrimino.Z);
 	}
 
 	public boolean hasSpun(Board b) {
 		return false;
+	}
+	
+	public boolean[][] rotInitialState(String s) {
+		switch (s) {
+		case "up": return ZPIECE_UP;
+		case "left": return ZPIECE_LEFT;
+		case "right": return ZPIECE_RIGHT;
+		default: return ZPIECE_DOWN;
+		}
 	}
 
 }

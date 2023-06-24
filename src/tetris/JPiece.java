@@ -1,7 +1,5 @@
 package tetris;
 
-import java.awt.Color;
-
 import javalib.worldimages.Posn;
 
 public class JPiece extends APiece {
@@ -34,14 +32,21 @@ public class JPiece extends APiece {
 		{ false, false, false, false }
 	};
 	
-	static CycleIndex JPIECE_ROTATIONS = new CycleIndex(JPIECE_UP, JPIECE_LEFT, JPIECE_RIGHT, JPIECE_DOWN);
 	
 	JPiece(Posn posn) {
-		super(posn, JPIECE_ROTATIONS, Tetrimino.J);
+		super(posn, new CycleIndex(JPIECE_UP.clone(), JPIECE_LEFT.clone(), JPIECE_RIGHT.clone(), JPIECE_DOWN.clone()), Tetrimino.J);
 	}
 
 	public boolean hasSpun(Board b) {
 		return false;
+	}
+	public boolean[][] rotInitialState(String s) {
+		switch (s) {
+		case "up": return JPIECE_UP;
+		case "left": return JPIECE_LEFT;
+		case "right": return JPIECE_RIGHT;
+		default: return JPIECE_DOWN;
+		}
 	}
 
 }

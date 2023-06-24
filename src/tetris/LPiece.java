@@ -32,13 +32,21 @@ public class LPiece extends APiece {
 		{ false, false, false, false }
 	};
 	
-	static CycleIndex LPIECE_ROTATIONS = new CycleIndex(LPIECE_UP, LPIECE_LEFT, LPIECE_RIGHT, LPIECE_DOWN);
 
 	LPiece(Posn posn) {
-		super(posn, LPIECE_ROTATIONS, Tetrimino.L);
+		super(posn, new CycleIndex(LPIECE_UP.clone(), LPIECE_LEFT.clone(), LPIECE_RIGHT.clone(), LPIECE_DOWN.clone()), Tetrimino.L);
 	}
 	
 	public boolean hasSpun(Board b) {
 		return false;
+	}
+	
+	public boolean[][] rotInitialState(String s) {
+		switch (s) {
+		case "up": return LPIECE_UP;
+		case "left": return LPIECE_LEFT;
+		case "right": return LPIECE_RIGHT;
+		default: return LPIECE_DOWN;
+		}
 	}
 }

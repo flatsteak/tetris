@@ -32,15 +32,22 @@ public class SPiece extends APiece {
 		{ false, false, false, false }
 	};
 	
-	static CycleIndex SPIECE_ROTATIONS = new CycleIndex(SPIECE_UP, SPIECE_LEFT, SPIECE_RIGHT, SPIECE_DOWN);
-	
 	SPiece(Posn posn) {
-		super(posn, SPIECE_ROTATIONS, Tetrimino.S);
+		super(posn, new CycleIndex(SPIECE_UP.clone(), SPIECE_LEFT.clone(), SPIECE_RIGHT.clone(), SPIECE_DOWN.clone()), Tetrimino.S);
 	}
 
 	@Override
 	public boolean hasSpun(Board b) {
 		return false;
+	}
+	
+	public boolean[][] rotInitialState(String s) {
+		switch (s) {
+		case "up": return SPIECE_UP;
+		case "left": return SPIECE_LEFT;
+		case "right": return SPIECE_RIGHT;
+		default: return SPIECE_DOWN;
+		}
 	}
 
 }

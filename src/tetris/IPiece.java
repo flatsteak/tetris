@@ -1,6 +1,6 @@
 package tetris;
 
-import java.awt.Color;
+import java.util.List;
 
 import javalib.worldimages.Posn;
 
@@ -34,13 +34,51 @@ public class IPiece extends APiece {
 		{ false, false, false, false }
 	};
 	
-	static CycleIndex IPIECE_ROTATIONS = new CycleIndex(IPIECE_UP, IPIECE_LEFT, IPIECE_RIGHT, IPIECE_DOWN);
 	IPiece(Posn posn) {
-		super(posn, IPIECE_ROTATIONS, Tetrimino.I);
-		// TODO Auto-generated constructor stub
+		super(posn, new CycleIndex(IPIECE_UP.clone(), IPIECE_LEFT.clone(), IPIECE_RIGHT.clone(), IPIECE_DOWN.clone()), Tetrimino.I);
 	}
 
 	public boolean hasSpun(Board b) {
 		return false;
 	}
+
+	public boolean[][] rotInitialState(String s) {
+		switch (s) {
+		case "up": return IPIECE_UP;
+		case "left": return IPIECE_LEFT;
+		case "right": return IPIECE_RIGHT;
+		default: return IPIECE_DOWN;
+		}
+	}
+	
+	public List<Posn> getKickTests(Rotation r) {
+		if (this.piece.first == this.rotInitialState("up")) {
+			switch (r) {
+			case CLOCKWISE: return List.of(new Posn(0, 0), new Posn(-2, 0), new Posn(1, 0), new Posn(-2, 1), new Posn(1, 2));
+			case COUNTERCLOCKWISE: return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(2, 0), new Posn(-1, 2), new Posn(2, -1));
+			default: return List.of(new Posn(0, 0));
+			}
+		} else if (this.piece.first == this.rotInitialState("right")) {
+			switch (r) {
+			case CLOCKWISE: return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(2, 0), new Posn(-1, -2), new Posn(2, -1));
+			case COUNTERCLOCKWISE: return List.of(new Posn(0, 0), new Posn(2, 0), new Posn(-1, 0), new Posn(2, 1), new Posn(-1, -2));
+			default: return List.of(new Posn(0, 0));
+			}
+		} else if (this.piece.first == this.rotInitialState("left")) {
+			switch (r) {
+			case CLOCKWISE: return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(-2, 0), new Posn(1, -2), new Posn(-2, 1));
+			case COUNTERCLOCKWISE: return List.of(new Posn(0, 0), new Posn(-2, 0), new Posn(1, 0), new Posn(-2, -1), new Posn(1, 2));
+			default: return List.of(new Posn(0, 0));
+			}
+		} else {
+			switch (r) {
+			case CLOCKWISE: return List.of(new Posn(0, 0), new Posn(2, 0), new Posn(-1, 0), new Posn(2, 1), new Posn(-1, -2));
+			case COUNTERCLOCKWISE: return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(-2, 0), new Posn(1, -2), new Posn(-2, 1));
+			default: return List.of(new Posn(0, 0));
+			}
+		}
+		
+	}
+	
+	
 }

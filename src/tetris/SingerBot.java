@@ -2,16 +2,25 @@ package tetris;
 
 import java.util.*;
 
-class SingerBot {
+interface SingerBot {
+	void makeMove(double time, Board b);
+}
+
+class FriendlySingerBot implements SingerBot {
 	String name;
 	List<String> speechpool;
 	
+	
+	
+	public void makeMove(double time, Board b) {
+		speechpool.get(new Random().nextInt(speechpool.size() - 1));
+	}
 }
 
-class HostileSingerBot {
+class HostileSingerBot implements SingerBot {
 	int aps; // attack per second
 	
-	void makeMove(double time, Board b) {
+	public void makeMove(double time, Board b) {
 		if (time == 0.0) {
 			b.addCheese(aps);
 		}
@@ -22,17 +31,18 @@ class HostileSingerBot {
 	}
 }
 
-class VSingerBot {
-	int aps; // attack per second
-	int atkleft; // lines left to send
+class VSingerBot implements SingerBot {
+	int attack; // in lines
+	int rate; // in ms
+	int atkleft; // lines left to send this cycle
 	
 	int garbagequeue; // lines it is going to recieve after a move
 	int health; // lines sent before victory
-	double cancel; // chance to cancel attacks
+	boolean cancel;
 	
-	void makeMove(double time, Board b) {
+	public void makeMove(double time, Board b) {
 		if (garbagequeue > 0) {
-			if (new Random().nextDouble(1.0) > 1 - cancel) {
+			if (cancel) {
 				if (atkleft > garbagequeue) {
 					this.atkleft -= garbagequeue;
 					garbagequeue = 0;
@@ -43,12 +53,14 @@ class VSingerBot {
 			}
 		} else if (time == 0.0) {
 			b.addCheese(atkleft); 
-			this.atkleft = aps;
+			this.atkleft = attack;
 		}
 	}
 	
 	VSingerBot(int aps, int hp) {
-		this.aps = aps;
+		this.attack = aps;
+		this.atkleft = aps;
 		this.health = hp;
+		this.cancel = true;
 	}
 }
