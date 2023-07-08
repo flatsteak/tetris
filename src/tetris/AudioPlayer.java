@@ -5,6 +5,10 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
+import javalib.worldimages.*;
+
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -37,6 +41,20 @@ public class AudioPlayer {
             e.printStackTrace();
         }
     }
+    
+    public void playAccurateLoop(String filePath, GameState g) {
+    	try {
+            File audioFile = new File(filePath);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            clip = AudioSystem.getClip();
+            clip.open(audioStream);
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
+            clip.start();
+            g.stats.starttime = System.currentTimeMillis();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void stop() {
         if (clip != null && clip.isRunning()) {
@@ -47,6 +65,12 @@ public class AudioPlayer {
 
 class FilePaths {
 	static String AUDIO = "/Users/felix/Downloads/Singertris/";
+	static String IMGS = "/Users/felix/Downloads/Singertris/";
+	
+	static WorldImage SINGERHAPPY = new FromFileImage(IMGS + "singerhappy.png");
+	
+	static WorldImage BGDEFAULT = new RectangleImage(0, 0, OutlineMode.SOLID, Color.WHITE);
+	static WorldImage BGSTARRY = new FromFileImage(IMGS + "bgdefault.jpeg");
 	
 	//double of path, artist + name
 	static List<Double<String, String>> SONG = List.of(new Double<String, String>(AUDIO + "CurtainCall.wav", "Curtain Call - Cansol"),

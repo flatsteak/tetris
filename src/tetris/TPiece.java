@@ -41,7 +41,7 @@ public class TPiece extends APiece {
 	
 	public boolean hasSpun(Board b) {
 		Residue[] top = b.residue.get(this.position.y);
-		Residue[] bottom = b.residue.get(this.position.y + 2);
+		Residue[] bottom = (this.position.y + 2 >= 20) ? b.newEmptyRow() : b.residue.get(this.position.y + 2);
 		
 		if (this.position.x + 2 > 9 || this.position.x < 0) {
 			return false;

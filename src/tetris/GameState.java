@@ -1,11 +1,13 @@
 package tetris;
 
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.util.*;
 
 import javalib.impworld.World;
 import javalib.impworld.WorldScene;
 import javalib.worldimages.*;
+
 
 
 enum Residue {
@@ -55,9 +57,10 @@ class GameState extends World {
 	boolean rightkeypressed;
 	
 	boolean spin;
+
 	// settings
-	static int DAS = 70; // in ms
-	static int ARR = 1; // in ms
+	static int DAS = 50; // in ms
+	static int ARR = 0; // in ms
 	static int SDF = 0; // in ms
 	
 	static int METER_SPACING = Board.CELL_SIZE * 2;
@@ -67,35 +70,47 @@ class GameState extends World {
 	static int INVERT_SPEED = (int) (1 / GAME_SPEED);
 	
 	static int DECO_DURATION = 2000;
+	
+	static int SCREEN_WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+	static int SCREEN_HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 
-	GameState() {
+	GameState() { 
 		this.board = new Board();
-		this.rules = new Ruleset(RuleType.LINES, 40);
+		this.rules = new Ruleset(RuleType.VS, 100);
 		this.stats = new GameStats();
 		this.keyheldtime = Optional.empty();
-		this.bot = this.rules.getBot(0, 0);
+		this.bot = DifficultyPool.VS_A;
 		this.storedval = 0;
 	}
 
+	
+	public WorldEnd worldEnds() {
+		if (this.rules.gameOver(this) || this.board.gameovertrigger) {
+			return new WorldEnd(true, this.rules.lastScene(this));
+		} else {
+			return new WorldEnd(false, this.makeScene());
+		}
+	}
 	public WorldScene makeScene() {
 		int width = Board.CELL_SIZE * this.board.width;
 		int height = Board.CELL_SIZE * this.board.height;
 		long systime = System.currentTimeMillis();
 		int time = (int) (systime - this.stats.starttime);
 		WorldScene s = new WorldScene(width, height);
-		
+		Posn singerpos = new Posn(GameState.SCREEN_WIDTH - (int) bot.getSinger().getWidth() / 2, GameState.SCREEN_HEIGHT - (int) bot.getSinger().getWidth() / 2);
 		
 		if (time == 0) {
 			time += 1;
 		}
+		s.placeImageXY(board.bgimage, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		
-		WorldImage linemeter = new TextImage("LINES:  " + this.stats.lines, Color.BLACK);
+		WorldImage linemeter = new TextImage("LINES:  " + this.stats.lines, Color.WHITE);
 		WorldImage atkmeter = new AtkMeter(this.stats.atk, time).getMeterVal();
 		WorldImage timemeter = new TimeMeter(time).getMeterVal();
 		WorldImage piecemeter = new PiecesMeter(this.stats.pieces, time).getMeterVal();
-		WorldImage b2bmeter = (this.board.b2b > 1)? new TextImage("B2B X" + (this.board.b2b - 1), Color.BLACK) :  new TextImage("", Color.BLACK);
-		WorldImage combometer = (this.board.currentcombo > 1)? new TextImage((this.board.currentcombo - 1) + " COMBO", Color.BLACK) :  new TextImage("", Color.BLACK);
-		WorldImage songname = new TextImage(FilePaths.BGSONG.second, Color.BLACK);
+		WorldImage b2bmeter = (this.board.b2b > 1)? new TextImage("B2B X" + (this.board.b2b - 1), Color.WHITE) :  new TextImage("", Color.WHITE);
+		WorldImage combometer = (this.board.currentcombo > 1)? new TextImage((this.board.currentcombo - 1) + " COMBO", Color.WHITE) :  new TextImage("", Color.WHITE);
+		WorldImage songname = new TextImage(FilePaths.BGSONG.second, Color.WHITE);
 		
 		
 
@@ -122,7 +137,7 @@ class GameState extends World {
 			}
 		}
 		if (shadow.position == storedpos) {
-			shadow.position = new Posn(shadow.position.x, this.board.height - shadow.getEmptyLineCount());
+			shadow.position = new Posn(shadow.position.x, this.board.height - shadow.getEmptyLineCountY());
 		}
 		
 		shadow.drawPiece(this.board.t, s, this.board.t.shadow);
@@ -141,7 +156,7 @@ class GameState extends World {
 					(int) (this.board.t.holdbox.getHeight() / 2) / Board.CELL_SIZE - 1);
 			p.drawPiece(this.board.t, s, this.board.pieceToImage(p));
 		}
-		s.placeImageXY(new TextImage("LINES:  " + this.stats.lines, Color.BLACK).movePinhole((linemeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE, FIRST_METER_SPACING);
+		s.placeImageXY(new TextImage("LINES:  " + this.stats.lines, Color.WHITE).movePinhole((linemeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE, FIRST_METER_SPACING);
 		s.placeImageXY(atkmeter.movePinhole((atkmeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE, (int) (METER_SPACING * 2.5));
 		s.placeImageXY(timemeter.movePinhole((timemeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE, METER_SPACING * 3);
 		s.placeImageXY(piecemeter.movePinhole((piecemeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE, (int) (METER_SPACING * 3.5));
@@ -150,7 +165,7 @@ class GameState extends World {
 		
 		for (int i = 0; i < 5; i++) {
 			APiece queuepiece = this.board.tetriminoToPiece(this.board.queue.get(i));
-			queuepiece.position = new Posn(Board.CELL_SIZE * 4 * i, height * Board.CELL_SIZE);
+			queuepiece.position = new Posn(width / Board.CELL_SIZE + 4, (i + 2) * 4);
 			queuepiece.drawPiece(this.board.t, s, this.board.pieceToImage(queuepiece));
 		}
 		
@@ -160,18 +175,22 @@ class GameState extends World {
 			s.placeImageXY(ornament.first, ornament.second.x, ornament.second.y);
 		}
 		
-		// animation drawing
-		for (int i = 0; i < this.board.anims.size(); i++) {
-			Animation a = this.board.anims.get(i);
-			s.placeImageXY(a.getAnim(), a.posn.x, a.posn.y);
-		}
+		s.placeImageXY(bot.getSinger(), singerpos.x, singerpos.y);
+		
+		// numbers drawing thing
 		if (this.board.ornaments.size() > 0 && System.currentTimeMillis() - this.stats.decostarttime > GameState.DECO_DURATION) {
 			this.board.ornaments.remove(0);
 			this.storedval = 0;
 			this.stats.decostarttime = System.currentTimeMillis();
 		}
 		
-		s.placeImageXY(songname.movePinhole(0, songname.getHeight() / 2), width * Board.CELL_SIZE / 2, height * Board.CELL_SIZE + 100);
+		s.placeImageXY(songname.movePinhole(0, - songname.getHeight() / 2), width / 2, height);
+		
+		// animation drawing
+		for (int i = 0; i < this.board.anims.size(); i++) {
+			Animation a = this.board.anims.get(i);
+			s.placeImageXY(a.getAnim(), a.posn.x, a.posn.y);
+		}
 		
 		return s;
 	}
@@ -187,17 +206,15 @@ class GameState extends World {
 				this.rightkeypressed = true;
 				break;
 			case "down":
-				if (GameState.SDF <= 0) {
-					this.board.fallingpiece.softDropInf(board);
-				} else {
 				this.sdfactive = true;
-				}
 				break;
 			case " ":
 				this.board.fallingpiece.hardDrop(board);
 				this.stats.pieces += 1;
 				new AudioPlayer().play(FilePaths.AUDIO + "placepiece.wav");
-				this.stats.atk += this.board.removeRows(this);
+				int tosend = this.board.removeRows(this);
+				this.stats.atk += tosend;
+				this.bot.sendLines(tosend);
 				spin = this.board.fallingpiece.hasSpun(this.board);
 				break;
 			case "c":
@@ -260,16 +277,26 @@ class GameState extends World {
 	public void onTick() {
 		int time = (int) (System.currentTimeMillis() - this.stats.starttime);
 		
-		for (Animation a : this.board.anims) {
-			a.tick();
+		bot.makeMove(this);
+		
+		for (int i = 0; i < this.board.anims.size(); i++) {
+				Animation a = this.board.anims.get(i);
+				if (a.isEnded()) {
+					this.board.anims.remove(a);
+				}
 		}
+		
+		System.out.println(this.board.anims + "");
 		
 		if ((rightkeypressed || leftkeypressed) && keyheldtime.isEmpty()) {
 			keyheldtime = Optional.of(System.currentTimeMillis());
 		}
 		boolean dascheck = (keyheldtime.isPresent())? System.currentTimeMillis() - keyheldtime.get() >= GameState.DAS : false;
 		
-		if (sdfactive && time % GameState.SDF == 0) {
+		if (sdfactive && GameState.SDF <= 0) {
+			this.board.fallingpiece.softDropInf(board);
+		}
+		else if (sdfactive && time % GameState.SDF == 0) {
 			this.board.fallingpiece.softDrop(board);
 		}
 		
@@ -284,7 +311,6 @@ class GameState extends World {
 		} else if (GameState.ARR <= 0 && dascheck && rightkeypressed) {
 			this.board.fallingpiece.moveRightInf(board);
 		}
-		
 		
 	}
 
@@ -306,8 +332,10 @@ class Board {
 	GarbageMeter garbage;
 	List<Double<WorldImage, Posn>> ornaments;
 	List<Animation> anims;
+	WorldImage bgimage;
 	
 	boolean spin;
+	boolean gameovertrigger;
 
 	static int CELL_SIZE = 20;
 
@@ -320,7 +348,7 @@ class Board {
 		}
 		this.currentcombo = 0;
 		this.b2b = 0;
-		this.t = ThemePool.OUTLINE_THEME;
+		this.t = ThemePool.FADE_THEME;
 		this.queue = Queue.sevenBag();
 		queue.addAll(Queue.sevenBag());
 		this.fallingpiece = this.pullFromBag(queue);
@@ -329,14 +357,36 @@ class Board {
 		this.garbage = new GarbageMeter();
 		this.ornaments = new ArrayList<>();
 		this.anims = new ArrayList<>();
+		this.bgimage = FilePaths.BGSTARRY;
 	}
 
-	void addCheese(int lines) {
-		List<Residue[]> toreturn = new ArrayList<>();
-		for (int i = 0; i < lines; i++) {
-			toreturn.add(i + lines, this.residue.get(i));
+	//
+	// CHEESE STUFF
+	//
+	
+	Residue[] newLineOfCheese(int cheesewell) {
+		Residue[] toreturn = new Residue[width];
+		for (int i = 0; i < width; i++) {
+			if (i == cheesewell) {
+				toreturn[i] = Residue.EMPTY;
+			} else {
+				toreturn[i] = Residue.CHEESE;
+			}
 		}
-		this.residue = toreturn;
+		return toreturn;
+	}
+	
+	void addCheese(int lines) {
+		int well = new Random().nextInt(width - 1);
+		Residue[] cheeseline = this.newLineOfCheese(well);
+		for (int i = 0; i < lines; i++) {
+			this.residue.remove(0);
+			this.residue.add(cheeseline);
+		}
+	}
+	
+	void recieveLines(int lines) {
+		this.garbage.garbage += lines;
 	}
 
 	void placePiece(APiece p) {
@@ -398,12 +448,14 @@ class Board {
 				toremove.add(i);
 			}
 		}
+		
+		boolean addcombo = false;
 		 if (toremove.size() <= 0) {
 			 this.currentcombo = 0;
-			// this.garbage.recieve(this, 0);
+			this.garbage.recieve(this);
 			return 0;
 		} else {
-			this.currentcombo += 1;
+			addcombo = true;
 		}
 		
 		for (Integer r : toremove) {
@@ -434,11 +486,11 @@ class Board {
 			}
 			g.storedval += atk;
 		g.stats.decostarttime = System.currentTimeMillis();
-		int txtsize = new Random().nextInt(Math.min(70, displayatk * 10), Math.min(80, displayatk * 10 + 10));
+		int txtsize = new Random().nextInt(Math.min(70, displayatk * 5), Math.min(80, displayatk * 5 + 10));
 		int rot = new Random().nextInt(-70, 70);
 		Double<WorldImage, Posn> toput = new Double<WorldImage, Posn>(new RotateImage(new OverlayImage(
 				new TextImage("" + displayatk, txtsize, Color.BLACK), 
-				new TextImage("" + displayatk, txtsize + 3, Color.WHITE)), rot), placeat);
+				new TextImage("" + displayatk, txtsize + 5, Color.WHITE)), rot), placeat);
 		if (this.ornaments.size() > 0) {
 			ornaments.set(0, toput);
 		} else {
@@ -448,11 +500,30 @@ class Board {
 		
 		if (displayatk >= 16) {
 			new AudioPlayer().play(FilePaths.AUDIO + "thundermini.wav");
-			this.anims.add(new Flashwave(placeat));
+			Animation flashlow = new Flashwave(placeat);
+			flashlow.start(placeat);
+			this.anims.add(flashlow);
 		}
 		else if (displayatk >= 10) {
 			new AudioPlayer().play(FilePaths.AUDIO + "thundermini.wav");
-			this.anims.add(new Flashwave(placeat));
+			Animation flashlow = new Flashwave(placeat);
+			flashlow.start(placeat);
+			this.anims.add(flashlow);
+		}
+		
+		if (addcombo) {
+			this.currentcombo += 1;
+		}
+		if (g.bot instanceof BeatmapSingerBot) {
+			this.garbage.garbage -= atk;
+		} else if (g.bot instanceof VSingerBot) {
+			if (this.garbage.garbage > 0 && atk >= this.garbage.garbage) {
+				this.garbage.garbage = 0;
+				atk -= this.garbage.garbage;
+			} else if (this.garbage.garbage > 0) {
+				this.garbage.garbage -= atk;
+				atk = 0;
+			}
 		}
 		return atk;
 		
@@ -543,22 +614,36 @@ class Board {
 	}
 
 	APiece tetriminoToPiece(Tetrimino pull) {
-		Posn spawn = new Posn(this.width / 2 - 1, 0);
+		Posn spawn = new Posn(this.width / 2 - 2, 0);
 		switch (pull) {
 			case S:
+				APiece spiece = new SPiece(spawn);
+				gameovertrigger = spiece.checkOverlap(this, spiece.piece.first, new Posn(0,0));
 				return new SPiece(spawn);
 			case Z:
-				return new ZPiece(spawn);
+				APiece zpiece = new ZPiece(spawn);
+				gameovertrigger = zpiece.checkOverlap(this, zpiece.piece.first, new Posn(0,0));
+				return zpiece;
 			case L:
-				return new LPiece(spawn);
+				APiece lpiece = new LPiece(spawn);
+				gameovertrigger = lpiece.checkOverlap(this, lpiece.piece.first, new Posn(0,0));
+				return lpiece;
 			case J:
-				return new JPiece(spawn);
+				APiece jpiece = new JPiece(spawn);
+				gameovertrigger = jpiece.checkOverlap(this, jpiece.piece.first, new Posn(0,0));
+				return jpiece;
 			case O:
-				return new OPiece(spawn);
+				APiece opiece = new OPiece(spawn);
+				gameovertrigger = opiece.checkOverlap(this, opiece.piece.first, new Posn(0,0));
+				return opiece;
 			case I:
-				return new IPiece(spawn);
+				APiece ipiece = new IPiece(spawn);
+				gameovertrigger = ipiece.checkOverlap(this, ipiece.piece.first, new Posn(0,0));
+				return ipiece;
 			default:
-				return new TPiece(spawn);
+				APiece tpiece = new TPiece(spawn);
+				gameovertrigger = tpiece.checkOverlap(this, tpiece.piece.first, new Posn(0,0));
+				return tpiece;
 		}
 
 	}

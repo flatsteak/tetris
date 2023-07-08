@@ -5,6 +5,9 @@ import java.awt.Color;
 import javalib.worldimages.*;
 
 public class Theme {
+	
+	static Color SKYBLUE = new Color(135, 206, 235);
+	static Color PURPLE = new Color(148 ,0, 211);
 	WorldImage i;
 	WorldImage s;
 	WorldImage z;
@@ -87,4 +90,22 @@ class ThemePool {
 					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.OUTLINE, Color.WHITE),
 					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.GRAY)));
 			
+	static Theme FADE_THEME = new Theme(
+			TetrisUtil.outlineFadeToBlack(Theme.SKYBLUE, Board.CELL_SIZE),
+			TetrisUtil.outlineFadeToBlack(Color.GREEN, Board.CELL_SIZE),
+			TetrisUtil.outlineFadeToBlack(Color.RED, Board.CELL_SIZE),
+			TetrisUtil.outlineFadeToBlack(Color.BLUE, Board.CELL_SIZE),
+			TetrisUtil.outlineFadeToBlack(Color.ORANGE, Board.CELL_SIZE),
+			TetrisUtil.outlineFadeToBlack(Color.YELLOW, Board.CELL_SIZE),
+			TetrisUtil.outlineFadeToBlack(Theme.PURPLE, Board.CELL_SIZE),
+			TetrisUtil.outlineFadeToBlack(Color.GRAY, Board.CELL_SIZE),
+			new OverlayImage( // empty
+					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.OUTLINE, Color.WHITE),
+					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, new Color(0, 0, 0, 200))),
+			new OverlayImage(
+					new RectangleImage(Board.CELL_SIZE * 4, Board.CELL_SIZE * 3, OutlineMode.OUTLINE, Color.WHITE),
+					new RectangleImage(Board.CELL_SIZE * 4, Board.CELL_SIZE * 3, OutlineMode.SOLID, Color.BLACK)),
+			new OverlayImage(
+					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.OUTLINE, Color.WHITE),
+					new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE, OutlineMode.SOLID, Color.GRAY)));
 }

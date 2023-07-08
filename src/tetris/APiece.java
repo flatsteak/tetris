@@ -63,11 +63,27 @@ abstract class APiece {
 		this.identity = identity;
 	}
 
-	int getEmptyLineCount() {
+	int getEmptyLineCountY() {
 		for (int i = 3; i >= 0; i -= 1) {
 			boolean foundFilled = false;
 			for (int j = 0; j < 4; j += 1) {
 				if (this.piece.first[i][j]) {
+				foundFilled = true;
+					break;
+				}
+			}
+			if (foundFilled) {
+				return 3 - i;
+			}
+		}
+		throw new RuntimeException("Impossible piece");
+	}
+	 
+	int getEmptyLineCountFromRight() {
+		for (int i = 3; i >= 0; i -= 1) {
+			boolean foundFilled = false;
+			for (int j = 0; j < 4; j += 1) {
+				if (this.piece.first[j][i]) {
 					foundFilled = true;
 					break;
 				}
@@ -79,6 +95,23 @@ abstract class APiece {
 		throw new RuntimeException("Impossible piece");
 	}
 
+	
+	int getEmptyLineCountFromLeft() {
+		for (int i = 0; i <= 3; i += 1) {
+			boolean foundFilled = false;
+			for (int j = 0; j < 4; j += 1) {
+				if (this.piece.first[j][i]) {
+					foundFilled = true;
+					break;
+				}
+			}
+			if (foundFilled) {
+				return i;
+			}
+		} 
+		throw new RuntimeException("Impossible piece");
+	}
+	
 	void rotate(Rotation r) {
 		if (r.equals(Rotation.CLOCKWISE)) {
 			this.piece.cycleRight();
@@ -135,17 +168,17 @@ abstract class APiece {
 				return;
 			}
 		}
-		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCount());
+		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCountY());
 	}
 	
 	void moveLeftInf(Board b) {
-		for (int i = 0; i < this.position.x; i++) {
+		for (int i = 1; i < this.position.x + this.getEmptyLineCountFromLeft(); i++) {
 			if (this.checkOverlap(b, this.piece.first, new Posn(-i, 0))) {
-				this.position = new Posn(i, this.position.y);
+				this.position = new Posn(this.position.x - i + 1, this.position.y);
 				return;
 			}
 		}
-		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCount());
+		this.position = new Posn(-this.getEmptyLineCountFromLeft(), this.position.y);
 	}
 	
 	void moveRightInf(Board b) {
@@ -155,7 +188,7 @@ abstract class APiece {
 				return;
 			}
 		}
-		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCount());
+		this.position = new Posn(b.width - this.getEmptyLineCountFromRight(), this.position.y);
 	}
 	
 	void hardDrop(Board b) {
@@ -167,7 +200,7 @@ abstract class APiece {
 			}
 		}
 		// Place it at the bottom of the board, which is b.height - 1, but adjusted for the piece
-		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCount());
+		this.position = new Posn(this.position.x, b.height - this.getEmptyLineCountY());
 		b.placePiece(this);
 		b.pieceplaced = true;
 		
@@ -181,20 +214,20 @@ abstract class APiece {
 		if (this.piece.first == this.rotInitialState("up")) {
 			switch (r) {
 			case CLOCKWISE:
-				return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(-1, -1), new Posn(0, 2), new Posn(-1, 2));
+				return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(-1, 1), new Posn(0, 2), new Posn(-1, 2));
 			case COUNTERCLOCKWISE:
-				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, -1), new Posn(0, 2), new Posn(1, 2));
+				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, 1), new Posn(0, 2), new Posn(1, 2));
 			default:
-				return List.of(new Posn(0, 0));
+				return List.of(new Posn(0, 0), new Posn(0, -1));
 			}
 		} else if (this.piece.first == this.rotInitialState("right")) {
 			switch (r) {
 			case CLOCKWISE:
 				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, 1), new Posn(0, -2), new Posn(1, 2));
 			case COUNTERCLOCKWISE:
-				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, 1), new Posn(0, -2), new Posn(1, 2));
+				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, 1), new Posn(1, 0), new Posn(0, -2), new Posn(1, 2));
 			default:
-				return List.of(new Posn(0, 0));
+				return List.of(new Posn(0, 0), new Posn(0, -1));
 			}
 		} else if (this.piece.first == this.rotInitialState("left")) {
 			switch (r) {
@@ -203,16 +236,16 @@ abstract class APiece {
 			case COUNTERCLOCKWISE:
 				return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(-1, 1), new Posn(0, 2), new Posn(-1, 2));
 			default:
-				return List.of(new Posn(0, 0));
+				return List.of(new Posn(0, 0), new Posn(0, -1));
 			}
 		} else {
 			switch (r) {
 			case CLOCKWISE:
-				return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(-1, -1), new Posn(0, 2), new Posn(-1, 2));
+				return List.of(new Posn(0, 0), new Posn(-1, 0), new Posn(-1, 1), new Posn(0, 2), new Posn(-1, 2));
 			case COUNTERCLOCKWISE:
-				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, -1), new Posn(0, 2), new Posn(1, 2));
+				return List.of(new Posn(0, 0), new Posn(1, 0), new Posn(1, 1), new Posn(0, 2), new Posn(1, 2));
 			default:
-				return List.of(new Posn(0, 0));
+				return List.of(new Posn(0, 0), new Posn(0, -1));
 			}
 		}
 
