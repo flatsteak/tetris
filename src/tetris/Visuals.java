@@ -65,11 +65,11 @@ class Flashwave extends Animation {
 
 	WorldImage getAnim() {
 		return IntStream.range(-SIZE, SIZE)
-				.mapToObj(j -> new CircleImage(Math.max(j + (int) (this.getCurrent() * SIZE * RATE / SPEED), 0), OutlineMode.OUTLINE,
+				.mapToObj(j -> new CircleImage(Math.max(j + (int) (this.getCurrent() * RATE / SPEED), 0), OutlineMode.OUTLINE,
 						new Color(Math.max(0, 1.0f - (Math.abs(j) / (2 * SIZE))), 
 								Math.max(0, 1.0f - (Math.abs(j) / (2 * SIZE))), 
 								Math.max(0, 1.0f - (Math.abs(j) / (2 * SIZE))), 
-								Math.max(0, Math.min(0.9f, Math.max(0, this.getCurrent() - (j / SIZE)))))))
+								Math.max(0, Math.min(0.9f, Math.max(0f, this.getCurrent() - (j / SIZE)))))))
 				.reduce((WorldImage) new RectangleImage(0, 0, OutlineMode.OUTLINE, Color.BLACK), (curr, next) -> new OverlayImage(curr, next), (a, b) -> new OverlayImage(a, b));
 	}
 }

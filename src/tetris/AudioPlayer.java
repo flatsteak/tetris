@@ -64,8 +64,16 @@ public class AudioPlayer {
 }
 
 class FilePaths {
-	static String AUDIO = "/Users/felix/Downloads/Singertris/";
-	static String IMGS = "/Users/felix/Downloads/Singertris/";
+	
+	
+	static String AUDIO = "../../sound/";
+	static String IMGS = "../../img/";
+	
+	static String SONGS = AUDIO + "gamesongs/";
+	static String SFX = AUDIO + "gamesfx/";
+	
+	static String BGIMGS = IMGS + "bg/";
+	static String BOTIMGS = IMGS + "enemies/";
 	
 	static WorldImage SINGERHAPPY = new FromFileImage(IMGS + "singerhappy.png");
 	
