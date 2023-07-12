@@ -79,7 +79,7 @@ class GameState extends World {
 		this.rules = new Ruleset(RuleType.VS, 100);
 		this.stats = new GameStats();
 		this.keyheldtime = Optional.empty();
-		this.bot = DifficultyPool.VS_A;
+		this.bot = DifficultyPool.CURTAIN_CALL_SS;
 		this.storedval = 0;
 	}
 
@@ -211,7 +211,7 @@ class GameState extends World {
 			case " ":
 				this.board.fallingpiece.hardDrop(board);
 				this.stats.pieces += 1;
-				new AudioPlayer().play(FilePaths.AUDIO + "placepiece.wav");
+				new AudioPlayer().play(FilePaths.PLACEPIECE);
 				int tosend = this.board.removeRows(this);
 				this.stats.atk += tosend;
 				this.bot.sendLines(tosend);
@@ -387,6 +387,7 @@ class Board {
 	
 	void recieveLines(int lines) {
 		this.garbage.garbage += lines;
+		new AudioPlayer().play(FilePaths.RECIEVESMALL);
 	}
 
 	void placePiece(APiece p) {

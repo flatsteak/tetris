@@ -172,7 +172,7 @@ abstract class APiece {
 	}
 	
 	void moveLeftInf(Board b) {
-		for (int i = 1; i < this.position.x + this.getEmptyLineCountFromLeft(); i++) {
+		for (int i = 1; i < this.position.x + 4; i++) {
 			if (this.checkOverlap(b, this.piece.first, new Posn(-i, 0))) {
 				this.position = new Posn(this.position.x - i + 1, this.position.y);
 				return;

@@ -11,6 +11,7 @@ import javalib.worldimages.*;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.*;
 import java.util.List;
 import java.util.Random;
 
@@ -66,8 +67,8 @@ public class AudioPlayer {
 class FilePaths {
 	
 	
-	static String AUDIO = "../../sound/";
-	static String IMGS = "../../img/";
+	static String AUDIO = "/Users/felix/Documents/SingertrisOfficial/sound/";
+	static String IMGS = "/Users/felix/Documents/SingertrisOfficial/img/";
 	
 	static String SONGS = AUDIO + "gamesongs/";
 	static String SFX = AUDIO + "gamesfx/";
@@ -75,14 +76,18 @@ class FilePaths {
 	static String BGIMGS = IMGS + "bg/";
 	static String BOTIMGS = IMGS + "enemies/";
 	
-	static WorldImage SINGERHAPPY = new FromFileImage(IMGS + "singerhappy.png");
+	static WorldImage SINGERHAPPY = new FromFileImage(BOTIMGS + "singerhappy.png");
 	
 	static WorldImage BGDEFAULT = new RectangleImage(0, 0, OutlineMode.SOLID, Color.WHITE);
-	static WorldImage BGSTARRY = new FromFileImage(IMGS + "bgdefault.jpeg");
+	static WorldImage BGSTARRY = new FromFileImage(BGIMGS + "bgdefault.jpeg");
 	
+	static String PLACEPIECE = SFX + "placepiece.wav";
+	static String RECIEVESMALL = SFX + "recievesmall.wav";
 	//double of path, artist + name
-	static List<Double<String, String>> SONG = List.of(new Double<String, String>(AUDIO + "CurtainCall.wav", "Curtain Call - Cansol"),
-			new Double<String, String>(AUDIO + "TwilightPiano.wav", "Twilight Piano - M-Murray"));
+	
+	static String CURTAIN_CALL = SONGS + "CurtainCall.wav";
+	static List<Double<String, String>> SONG = List.of(new Double<String, String>(CURTAIN_CALL, "Curtain Call - Cansol"),
+			new Double<String, String>(SONGS + "TwilightPiano.wav", "Twilight Piano - M-Murray"));
 			
 	static Double<String, String> BGSONG = FilePaths.SONG.get(new Random().nextInt(FilePaths.SONG.size()));
 }

@@ -19,7 +19,7 @@ public class DifficultyPool {
 			new Interval(9840, 0, new FadingCircleSizeAnimation(500, AnimateValue.OUTSIN, 40, Color.WHITE, new Posn(singerpos.x + 100, singerpos.y + 100), 150)),
 			new Interval(10060, 6, new FadingRotatingTriangleAnimation(500, AnimateValue.ARCTAN, 500, Color.WHITE, singerpos, 150, 100)),
 			new Interval(10800, 2),
-			new Interval(12000, 4))), FilePaths.AUDIO + "CurtainCall.wav");
+			new Interval(12000, 4))), FilePaths.CURTAIN_CALL);
 	
 	static VSingerBot VS_A = new VSingerBot(4, 10000, 40);
 }

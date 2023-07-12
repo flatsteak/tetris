@@ -40,7 +40,7 @@ public class Ruleset {
 	
 	SingerBot getBot(int aps, int hp) {
 		switch (type) {
-		case VS: return new VSingerBot(aps, hp);
+		case VS: return new VSingerBot(aps, 1000, hp);
 		case SURVIVAL: return new HostileSingerBot(aps);
 		default: return new FriendlySingerBot();
 		}
