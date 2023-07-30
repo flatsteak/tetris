@@ -21,3 +21,11 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+# Added by coconfig
+.eslintignore
+.npmignore
+tsconfig.json
+tsconfig.build.json
+.prettierrc.js
+.eslintrc.js
+.commitlintrc.json

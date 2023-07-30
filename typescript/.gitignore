@@ -1,0 +1,22 @@
+node_modules
+dist/
+
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Added by coconfig
+.eslintignore
+.npmignore
+tsconfig.json
+tsconfig.build.json
+.prettierrc.js
+.eslintrc.js
+.commitlintrc.json
+vitest.config.ts
+/test-results/
+/playwright-report/
+/playwright/.cache/

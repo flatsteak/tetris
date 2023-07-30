@@ -1,0 +1,25 @@
+{
+  "name": "tetris",
+  "version": "1.0.0",
+  "description": "Typescript version of tetris",
+  "main": "index.js",
+  "author": "Felix Metral",
+  "license": "MIT",
+  "private": true,
+  "packageManager": "yarn@3.6.1",
+  "devDependencies": {
+    "@openapi-typescript-infra/coconfig": "^3.3.4",
+    "coconfig": "^0.13.3",
+    "tsup": "^7.1.0"
+  },
+  "config": {
+    "coconfig": "@openapi-typescript-infra/coconfig"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts",
+    "postinstall": "yarn coconfig"
+  },
+  "dependencies": {
+    "impworld": "^1.0.4"
+  }
+}
