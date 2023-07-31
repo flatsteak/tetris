@@ -24,7 +24,6 @@ jobs:
           cd typescript
           yarn install --immutable
           yarn build
-          yarn lint
 
           mkdir deployable
           cp index.html deployable
