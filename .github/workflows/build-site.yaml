@@ -20,11 +20,14 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: |
+      - name: Build Typescript application
+        run: |
           cd typescript
           yarn install --immutable
           yarn build
-
+      - name: Assemble deployment assets
+        run: |
+          cd typescript
           mkdir deployable
           cp index.html deployable
           mv dist deployable
@@ -34,4 +37,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./deployable
+          publish_dir: ./typescript/deployable
