@@ -8,7 +8,7 @@
   "private": true,
   "packageManager": "yarn@3.6.1",
   "devDependencies": {
-    "@openapi-typescript-infra/coconfig": "^3.3.4",
+    "@openapi-typescript-infra/coconfig": "^3.3.5",
     "coconfig": "^0.13.3",
     "tsup": "^7.1.0"
   },
@@ -20,6 +20,6 @@
     "postinstall": "yarn coconfig"
   },
   "dependencies": {
-    "impworld": "^1.0.4"
+    "impworld": "^1.1.1"
   }
 }

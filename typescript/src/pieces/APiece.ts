@@ -1,8 +1,10 @@
-import { Posn } from 'impworld';
+import { Posn, WorldImage, WorldScene } from 'impworld';
 import { CycleIndex } from './CycleIndex';
 import { Tetrimino } from './Tetrimino';
 import { Board } from '@/board';
 import { Rotation } from '@/pieces/Rotation';
+import { Theme } from '@/themes/Theme';
+import { CELL_SIZE } from '@/constants';
 
 export abstract class APiece {
   position: Posn;
@@ -220,4 +222,17 @@ export abstract class APiece {
 
   abstract hasSpun(b: Board): boolean;
   abstract rotInitialState(s: string): boolean[][];
+
+  drawPiece(t: Theme, s: WorldScene, cell: WorldImage) {
+		for (let i = 0; i < 4; i++) {
+			for (let j = 0; j < 4; j++) {
+				if (this.piece.first[i][j]) {
+					s.placeImageXY(
+						cell,
+						(j + this.position.x) * CELL_SIZE + CELL_SIZE / 2,
+						(i + this.position.y) * CELL_SIZE + CELL_SIZE / 2);
+				}
+			}
+		}
+	}
 }

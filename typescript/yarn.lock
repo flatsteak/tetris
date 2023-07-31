@@ -311,10 +311,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openapi-typescript-infra/coconfig@npm:^3.3.4":
-  version: 3.3.4
-  resolution: "@openapi-typescript-infra/coconfig@npm:3.3.4"
-  checksum: 0f0d752421b19ddb9d1a365b1e3d57b6cb6a869b8af38e2f825cb869fe457b872bb2e28b4c537343147a1ff0128ada16a82766017e69f0acb7d512252d2b8ef9
+"@openapi-typescript-infra/coconfig@npm:^3.3.5":
+  version: 3.3.5
+  resolution: "@openapi-typescript-infra/coconfig@npm:3.3.5"
+  checksum: 188c9989fe7f0e39682dfa1f0920e689ef54b3124ab38626941e8650c75f10ae5c58dfcda859bf887e5a041c3ae26aefabe54ced8b1161ed7b83d8fa432b7485
   languageName: node
   linkType: hard
 
@@ -1240,12 +1240,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"impworld@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "impworld@npm:1.0.4"
+"impworld@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "impworld@npm:1.1.1"
   dependencies:
     konva: ^9.2.0
-  checksum: 466bc14a80250489e6907490dafcaa4aa87cef16ebc43578861a1e1a33ef3b4dba666912d9664b3a0bc9c888c0a737aa8d89c1633f0fa6e3e0cf990716f15dea
+  checksum: 7a28dac3f94765b7bb1e31e7764809b962d1b6b5f85b578cb2e342c4c42f1eaa68995e669bb43b5c525c0ded808bcba29e0492944a9c8fbb7c42b88e2116f97b
   languageName: node
   linkType: hard
 
@@ -2344,9 +2344,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "tetris@workspace:."
   dependencies:
-    "@openapi-typescript-infra/coconfig": ^3.3.4
+    "@openapi-typescript-infra/coconfig": ^3.3.5
     coconfig: ^0.13.3
-    impworld: ^1.0.4
+    impworld: ^1.1.1
     tsup: ^7.1.0
   languageName: unknown
   linkType: soft
