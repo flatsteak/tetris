@@ -75,14 +75,27 @@ class FilePaths {
 	
 	static String BGIMGS = IMGS + "bg/";
 	static String BOTIMGS = IMGS + "enemies/";
+	static String TEXTURES = IMGS;
 	
 	static WorldImage SINGERHAPPY = new FromFileImage(BOTIMGS + "singerhappy.png");
 	
 	static WorldImage BGDEFAULT = new RectangleImage(0, 0, OutlineMode.SOLID, Color.WHITE);
 	static WorldImage BGSTARRY = new FromFileImage(BGIMGS + "bgdefault.jpeg");
 	
+	
+	static WorldImage SPECIAL_PLACEHOLDER = new RotateImage(new RectangleImage(35, 35, OutlineMode.OUTLINE, Color.WHITE), 45);
+	static WorldImage S_CYCLONE = new FromFileImage(IMGS + "special-CYCLONE.png");
+	static WorldImage A_S_CYCLONE = new FromFileImage(IMGS + "active-special-CYCLONE.png");
+	static WorldImage S_FRENZY = new FromFileImage(IMGS + "special-FRENZY.png");
+	static WorldImage A_S_FRENZY = new FromFileImage(IMGS + "active-special-FRENZY.png");
+	
+	static WorldImage AB_SHIELD_I = new FromFileImage(IMGS + "ability-SHIELD_I.png");
+	static WorldImage A_AB_SHIELD_I = new FromFileImage(IMGS + "active-ability-SHIELD_I.png");
+	
+	
 	static String PLACEPIECE = SFX + "placepiece.wav";
 	static String RECIEVESMALL = SFX + "recievesmall.wav";
+	static String LIGHTNINGMINI = SFX + "thundermini.wav";
 	//double of path, artist + name
 	
 	static String CURTAIN_CALL = SONGS + "CurtainCall.wav";

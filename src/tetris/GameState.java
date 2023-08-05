@@ -49,6 +49,11 @@ class GameState extends World {
 	boolean sdfactive;
 	SingerBot bot;
 	int storedval;
+	Optional<Player> player;
+	Tetrimino last;
+	
+	DifficultySelectionScreen selscreen = DifficultySelectionScreen.DEFAULT_SELECTION;
+	boolean selectionscreenup = true;
 	
 	boolean arractiveleft;
 	boolean leftkeypressed;
@@ -58,6 +63,7 @@ class GameState extends World {
 	
 	boolean spin;
 
+	
 	// settings
 	static int DAS = 50; // in ms
 	static int ARR = 0; // in ms
@@ -69,10 +75,13 @@ class GameState extends World {
 	static double GAME_SPEED = 0.001;
 	static int INVERT_SPEED = (int) (1 / GAME_SPEED);
 	
+	// positions
+	
 	static int DECO_DURATION = 2000;
 	
 	static int SCREEN_WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
 	static int SCREEN_HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+	static Posn SPECIALPOS = new Posn(SCREEN_WIDTH / 16, SCREEN_HEIGHT * 3 / 4);
 
 	GameState() { 
 		this.board = new Board();
@@ -81,6 +90,7 @@ class GameState extends World {
 		this.keyheldtime = Optional.empty();
 		this.bot = DifficultyPool.CURTAIN_CALL_SS;
 		this.storedval = 0;
+		this.player = Optional.of(Player.DEFAULT_BUILD);
 	}
 
 	
@@ -102,6 +112,10 @@ class GameState extends World {
 		if (time == 0) {
 			time += 1;
 		}
+		
+		
+		
+		if (!selectionscreenup) {
 		s.placeImageXY(board.bgimage, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		
 		WorldImage linemeter = new TextImage("LINES:  " + this.stats.lines, Color.WHITE);
@@ -124,8 +138,20 @@ class GameState extends World {
 					board.width / 2 * Board.CELL_SIZE,
 					i * Board.CELL_SIZE + Board.CELL_SIZE / 2);
 		}
+		// special, ability slots, enchant
+		if (player.isPresent()) {
+			s.placeImageXY(player.get().special.draw(), SPECIALPOS.x, SPECIALPOS.y);
+		}
 		
-		s.placeImageXY(this.board.garbage.draw(this.board.height), board.width * Board.CELL_SIZE + Board.CELL_SIZE / 2, this.board.height / 2 * Board.CELL_SIZE);
+		
+		
+		// garbagemeters
+		WorldImage garbagemeter = this.board.garbage.draw(this.board.height);
+		WorldImage chargemeter = this.board.chargemeter.draw(this.board.height);
+		WorldImage meters = new BesideImage(garbagemeter, chargemeter).movePinhole(-Board.CELL_SIZE / 2, 0);
+		WorldImage meterswithdisplay = new OverlayOffsetAlign(AlignModeX.CENTER, AlignModeY.BOTTOM, meters, 0, board.garbage.displayLines().getHeight() * 3 / 2, new AboveImage(board.garbage.displayLines(), board.chargemeter.displayLines())).movePinholeTo(meters.pinhole);
+		
+		s.placeImageXY(meterswithdisplay, board.width * Board.CELL_SIZE + Board.CELL_SIZE / 2, this.board.height / 2 * Board.CELL_SIZE);
 		
 		
 		APiece shadow = this.board.fallingpiece;
@@ -146,9 +172,9 @@ class GameState extends World {
 		this.board.fallingpiece.drawPiece(this.board.t, s, this.board.pieceToImage(this.board.fallingpiece));
 
 		
+		// hold piece drawing
 		
-		
-		s.placeImageXY(this.board.t.holdbox, (int) (width + this.board.t.holdbox.getWidth() / 2) + Board.CELL_SIZE,
+		s.placeImageXY(this.board.t.holdbox, (int) (width + this.board.t.holdbox.getWidth() / 2) + Board.CELL_SIZE * 2,
 				(int) this.board.t.holdbox.getHeight() / 2);
 		if (this.board.hold.isPresent()) {
 			APiece p = this.board.tetriminoToPiece(this.board.hold.get());
@@ -156,12 +182,13 @@ class GameState extends World {
 					(int) (this.board.t.holdbox.getHeight() / 2) / Board.CELL_SIZE - 1);
 			p.drawPiece(this.board.t, s, this.board.pieceToImage(p));
 		}
-		s.placeImageXY(new TextImage("LINES:  " + this.stats.lines, Color.WHITE).movePinhole((linemeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE, FIRST_METER_SPACING);
-		s.placeImageXY(atkmeter.movePinhole((atkmeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE, (int) (METER_SPACING * 2.5));
-		s.placeImageXY(timemeter.movePinhole((timemeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE, METER_SPACING * 3);
-		s.placeImageXY(piecemeter.movePinhole((piecemeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE, (int) (METER_SPACING * 3.5));
-		s.placeImageXY(b2bmeter.movePinhole((b2bmeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE, METER_SPACING * 4);
-		s.placeImageXY(combometer.movePinhole((combometer.getWidth() * -1) / 2, 0), width +  Board.CELL_SIZE, METER_SPACING * 5);
+		
+		s.placeImageXY(new TextImage("LINES:  " + this.stats.lines, Color.WHITE).movePinhole((linemeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE * 2, FIRST_METER_SPACING);
+		s.placeImageXY(atkmeter.movePinhole((atkmeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE * 2, (int) (METER_SPACING * 2.5));
+		s.placeImageXY(timemeter.movePinhole((timemeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE * 2, METER_SPACING * 3);
+		s.placeImageXY(piecemeter.movePinhole((piecemeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE * 2, (int) (METER_SPACING * 3.5));
+		s.placeImageXY(b2bmeter.movePinhole((b2bmeter.getWidth() * -1) / 2, 0), width + Board.CELL_SIZE * 2, METER_SPACING * 4);
+		s.placeImageXY(combometer.movePinhole((combometer.getWidth() * -1) / 2, 0), width +  Board.CELL_SIZE * 2, METER_SPACING * 5);
 		
 		for (int i = 0; i < 5; i++) {
 			APiece queuepiece = this.board.tetriminoToPiece(this.board.queue.get(i));
@@ -192,10 +219,16 @@ class GameState extends World {
 			s.placeImageXY(a.getAnim(), a.posn.x, a.posn.y);
 		}
 		
+		} else {
+			DifficultySelectionScreen defaultsel = DifficultySelectionScreen.DEFAULT_SELECTION;
+			defaultsel.placeAllButtons(new Posn(100, 100));
+			s.placeImageXY(defaultsel.drawAllSelections(), 100, 100);
+		}
 		return s;
 	}
 
 	public void onKeyEvent(String key) {
+		
 		switch (key) {
 			case "left":
 				this.board.fallingpiece.moveLeft(board);
@@ -209,10 +242,11 @@ class GameState extends World {
 				this.sdfactive = true;
 				break;
 			case " ":
+				last = this.board.fallingpiece.identity;
 				this.board.fallingpiece.hardDrop(board);
 				this.stats.pieces += 1;
 				new AudioPlayer().play(FilePaths.PLACEPIECE);
-				int tosend = this.board.removeRows(this);
+				int tosend = this.board.removeRows(this, last);
 				this.stats.atk += tosend;
 				this.bot.sendLines(tosend);
 				spin = this.board.fallingpiece.hasSpun(this.board);
@@ -262,7 +296,30 @@ class GameState extends World {
 			case "r":
 				this.board = new Board();
 				this.stats = new GameStats();
+				break;
+			case "f":
+				if (this.player.isPresent() && last != null) {
+					this.player.get().special.activate(this, last, this.board.fallingpiece.hasSpun(board));
+					if (this.player.get().special.active) {
+					Animation specialanim = new FadingCircleSizeAnimation(500, AnimateValue.OUTSIN, 20, Theme.PURPLE, new Posn(Board.CELL_SIZE * this.board.width / 2, Board.CELL_SIZE * this.board.height / 2), 200);
+					specialanim.start();
+					board.anims.add(specialanim);
+					board.garbage.garbage += player.get().special.cost;
+					}
+				}
+
+				
 		}
+		
+		if (player.isPresent()) {
+			for (AbilitySlot abilityslot : player.get().abilities) {
+				if (key == abilityslot.key) {
+
+					player.get().active.add(abilityslot.ability);
+				}
+			}
+		}
+		
 	}
 	public void onKeyReleased(String key) {
 		switch (key) {
@@ -285,8 +342,6 @@ class GameState extends World {
 					this.board.anims.remove(a);
 				}
 		}
-		
-		System.out.println(this.board.anims + "");
 		
 		if ((rightkeypressed || leftkeypressed) && keyheldtime.isEmpty()) {
 			keyheldtime = Optional.of(System.currentTimeMillis());
@@ -313,6 +368,12 @@ class GameState extends World {
 		}
 		
 	}
+	
+	public void onMouseReleased(Posn p) {
+		if (selectionscreenup) {
+			selscreen.findClickedButton(p, this);
+		}
+	}
 
 }
 
@@ -329,7 +390,10 @@ class Board {
 	APiece fallingpiece;
 	Optional<Tetrimino> hold;
 	boolean pieceplaced;
+	
 	GarbageMeter garbage;
+	ChargeMeter chargemeter;
+	
 	List<Double<WorldImage, Posn>> ornaments;
 	List<Animation> anims;
 	WorldImage bgimage;
@@ -355,6 +419,7 @@ class Board {
 		this.hold = Optional.empty();
 		this.pieceplaced = false;
 		this.garbage = new GarbageMeter();
+		this.chargemeter = new ChargeMeter();
 		this.ornaments = new ArrayList<>();
 		this.anims = new ArrayList<>();
 		this.bgimage = FilePaths.BGSTARRY;
@@ -440,7 +505,7 @@ class Board {
 		return toreturn;
 	}
 
-	int removeRows(GameState g) {
+	int removeRows(GameState g, Tetrimino t) {
 		System.out.println(this.currentcombo);
 		List<Integer> toremove = new ArrayList<>();
 		for (int i = 0; i < height; i++) {
@@ -479,6 +544,21 @@ class Board {
 			this.b2b += 1;
 		}
 		
+		if (g.player.isPresent() && g.player.get().active.size() > 0) {
+			for (Ability ability : g.player.get().active) {
+				atk = ability.effect(g, atk, t);
+			}
+			
+		}
+		
+		Color textcolor = Color.BLACK;
+		if (g.player.isPresent() && g.player.get().special.active) {
+			textcolor = Theme.PURPLE;
+			g.player.get().special.effect(atk, g, t, g.spin);
+		}
+
+		
+		
 		Posn placeat = new Posn(this.width / 2 * CELL_SIZE, toremove.get(0) * CELL_SIZE);
 		int displayatk = atk;
 		if (atk != 0) {
@@ -490,7 +570,7 @@ class Board {
 		int txtsize = new Random().nextInt(Math.min(70, displayatk * 5), Math.min(80, displayatk * 5 + 10));
 		int rot = new Random().nextInt(-70, 70);
 		Double<WorldImage, Posn> toput = new Double<WorldImage, Posn>(new RotateImage(new OverlayImage(
-				new TextImage("" + displayatk, txtsize, Color.BLACK), 
+				new TextImage("" + displayatk, txtsize, textcolor), 
 				new TextImage("" + displayatk, txtsize + 5, Color.WHITE)), rot), placeat);
 		if (this.ornaments.size() > 0) {
 			ornaments.set(0, toput);
@@ -515,8 +595,18 @@ class Board {
 		if (addcombo) {
 			this.currentcombo += 1;
 		}
+		
+		
 		if (g.bot instanceof BeatmapSingerBot) {
-			this.garbage.garbage -= atk;
+			if (g.player.isPresent()) {
+				if (g.player.get().special.active) {
+					this.chargemeter.power += atk;
+				} else {
+					this.garbage.garbage -= atk;
+				}
+			} else {
+				this.garbage.garbage -= atk;
+			}
 		} else if (g.bot instanceof VSingerBot) {
 			if (this.garbage.garbage > 0 && atk >= this.garbage.garbage) {
 				this.garbage.garbage = 0;
@@ -526,6 +616,7 @@ class Board {
 				atk = 0;
 			}
 		}
+
 		return atk;
 		
 		

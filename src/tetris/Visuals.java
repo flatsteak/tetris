@@ -15,6 +15,7 @@ class AnimateValue {
 	static IFunc<Float> LOGBASE100 = (a) -> (float) ((TetrisUtil.logBase(100, a + 1.01) + 1) / (TetrisUtil.logBase(100, 1.01) + 1));
 	static IFunc<Float> ARCTAN = (a) -> (float) (Math.atan(2 * a) / Math.atan(2));
 }
+
 abstract class Animation {
 	long start; // ms
 	long end; // ms
@@ -53,7 +54,7 @@ abstract class Animation {
 
 class Flashwave extends Animation {
 	int radius;
-	static int SIZE = 40;
+	static int SIZE = 20; // # thickness outline
 	static int SPEED = 1; // in ticks (ms)
 	static double RATE = 5; // px / tickspeed
 	static int SIZE_LIMIT = SIZE * 50;
@@ -64,13 +65,7 @@ class Flashwave extends Animation {
 	}
 
 	WorldImage getAnim() {
-		return IntStream.range(-SIZE, SIZE)
-				.mapToObj(j -> new CircleImage(Math.max(j + (int) (this.getCurrent() * RATE / SPEED), 0), OutlineMode.OUTLINE,
-						new Color(Math.max(0, 1.0f - (Math.abs(j) / (2 * SIZE))), 
-								Math.max(0, 1.0f - (Math.abs(j) / (2 * SIZE))), 
-								Math.max(0, 1.0f - (Math.abs(j) / (2 * SIZE))), 
-								Math.max(0, Math.min(0.9f, Math.max(0f, this.getCurrent() - (j / SIZE)))))))
-				.reduce((WorldImage) new RectangleImage(0, 0, OutlineMode.OUTLINE, Color.BLACK), (curr, next) -> new OverlayImage(curr, next), (a, b) -> new OverlayImage(a, b));
+		return TetrisUtil.outlineCircleInteriorFade(SIZE, (int) this.getCurrent() * SIZE_LIMIT, 1f - this.getCurrent());
 	}
 }
 
@@ -194,5 +189,26 @@ class InverseLinearFlash extends Animation {
 	WorldImage getAnim() {
 		float pos = c.getAlpha() * getCurrent();
 		return new RectangleImage(GameState.SCREEN_WIDTH, GameState.SCREEN_HEIGHT, OutlineMode.SOLID, new Color(c.getRed(), c.getGreen(), c.getBlue(), (int) pos)).movePinhole(-GameState.SCREEN_WIDTH / 2, -GameState.SCREEN_HEIGHT / 2);
+	}
+}
+
+
+class FadingTextAnimation extends Animation {
+	IFunc<Float> step;
+	String text;
+	Color c;
+	int size;
+	
+	FadingTextAnimation(int duration, int size, Color c, String text, IFunc<Float> step) {
+		super(duration);
+		this.step = step;
+		this.c = c;
+		this.text = text;
+		this.size = size;
+	}
+
+
+	WorldImage getAnim() {
+		return new TextImage(text, size, new Color((float) c.getRed() / 255, (float) c.getGreen() / 255, (float) c.getBlue() / 255, ((float) c.getAlpha() / 255) * (1f - step.apply(this.getCurrent()))));
 	}
 }

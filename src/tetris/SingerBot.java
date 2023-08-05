@@ -12,6 +12,7 @@ interface SingerBot {
 	String getSong();
 	WorldImage sendLines(int lines);
 	Posn getScreenPosn();
+	String getBotName();
 }
 
 class FriendlySingerBot implements SingerBot {
@@ -62,6 +63,11 @@ class FriendlySingerBot implements SingerBot {
 	public Posn getScreenPosn() {
 		return new Posn(GameState.SCREEN_WIDTH - (int) (this.getSinger().getWidth()) / 2, GameState.SCREEN_HEIGHT / 2);
 	}
+
+	@Override
+	public String getBotName() {
+		return "40L";
+	}
 }
 
 class HostileSingerBot implements SingerBot {
@@ -105,6 +111,11 @@ class HostileSingerBot implements SingerBot {
 	
 	public Posn getScreenPosn() {
 		return new Posn(GameState.SCREEN_WIDTH - (int) (this.getSinger().getWidth()) / 2, GameState.SCREEN_HEIGHT / 2);
+	}
+
+	@Override
+	public String getBotName() {
+		return "SURVIVAL";
 	}
 }
 
@@ -150,7 +161,6 @@ class VSingerBot implements SingerBot {
 
 	@Override
 	public String getSong() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -161,6 +171,11 @@ class VSingerBot implements SingerBot {
 	
 	public Posn getScreenPosn() {
 		return new Posn(GameState.SCREEN_WIDTH - (int) (this.getSinger().getWidth()) / 2, GameState.SCREEN_HEIGHT / 2);
+	}
+
+	@Override
+	public String getBotName() {
+		return "VS BOT";
 	}
 }
 
@@ -210,11 +225,15 @@ class BeatmapSingerBot implements SingerBot {
 	List<Interval> lines;
 	boolean end;
 	String song;
+	String songtitle;
+	String difficulty;
 	
-	BeatmapSingerBot(List<Interval> lines, String song) {
+	BeatmapSingerBot(List<Interval> lines, String song, String title, String difficulty) {
 		this.lines = lines;
 		this.end = false;
 		this.song = song;
+		this.songtitle = title;
+		this.difficulty = difficulty;
 	}
 	public WorldImage getSinger() {
 		return FilePaths.SINGERHAPPY;
@@ -270,6 +289,10 @@ class BeatmapSingerBot implements SingerBot {
 	
 	public Posn getScreenPosn() {
 		return new Posn(GameState.SCREEN_WIDTH - (int) (this.getSinger().getWidth()) / 2, GameState.SCREEN_HEIGHT / 2);
+	}
+	@Override
+	public String getBotName() {
+		return songtitle + difficulty;
 	}
 	
 }

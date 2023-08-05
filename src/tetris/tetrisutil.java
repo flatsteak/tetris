@@ -39,6 +39,17 @@ class TetrisUtil {
 		return toreturn;
 	}
 	
+	static WorldImage outlineCircleInteriorFade(int amt, int size, float alpha) {
+		WorldImage toreturn = new CircleImage(size, OutlineMode.OUTLINE, new Color(0f, 0f, 0f, alpha));
+		int middle = size - amt / 2;
+		for (int i = size - 1; i > size - amt; i--) {
+			float grayamt = Math.abs(i - middle) / amt;
+			toreturn = new OverlayImage(toreturn, new CircleImage(i, OutlineMode.OUTLINE, new Color(grayamt, grayamt, grayamt, Math.max(alpha - grayamt, 0f))));
+		}
+		return toreturn;
+	}
+	
+	
 	static WorldImage outlineTriangleInterior(int amt, int size, Color c) {
 		WorldImage toreturn = new EquilateralTriangleImage(size, OutlineMode.OUTLINE, c);
 		for (int i = size - 1; i > size - amt; i--) {
@@ -170,14 +181,50 @@ class GarbageMeter {
 		WorldImage meterwithgarbage = new OverlayOffsetAlign(AlignModeX.CENTER, AlignModeY.BOTTOM, garbagedisplay, 0, 0, meter);
 		WorldImage maxbar = new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE * maxaccept, OutlineMode.OUTLINE, Color.WHITE);
 		
-		if (garbage > 20) {
-			WorldImage extragarbage = new TextImage("+ " + (garbage - 20), 30, Color.RED);
-			return new BesideAlignImage(AlignModeY.BOTTOM, new OverlayOffsetAlign(AlignModeX.CENTER, AlignModeY.BOTTOM, maxbar, 0, 0, meterwithgarbage), extragarbage).movePinhole(-extragarbage.getWidth() / 2, 0);
-		} else if (garbage < -20) {
-			WorldImage extrashield = new TextImage("+ " + -(garbage + 20), 30, Theme.SKYBLUE);
-			return new BesideAlignImage(AlignModeY.BOTTOM, new OverlayOffsetAlign(AlignModeX.CENTER, AlignModeY.BOTTOM, maxbar, 0, 0, meterwithgarbage), extrashield).movePinhole(-extrashield.getWidth() / 2, 0);
+		return new OverlayOffsetAlign(AlignModeX.CENTER, AlignModeY.BOTTOM, maxbar, 0, 0, meterwithgarbage);
+	}
+	
+	WorldImage displayLines() {
+		WorldImage extragarbage = new TextImage("" + garbage, 30, Color.RED);
+		if (garbage < 0) {
+			extragarbage = new TextImage("" + -garbage, 30, Theme.SKYBLUE);
 		}
 		
-		return new OverlayOffsetAlign(AlignModeX.CENTER, AlignModeY.BOTTOM, maxbar, 0, 0, meterwithgarbage);
+		return extragarbage;
+	}
+}
+
+class ChargeMeter {
+	int power; // in lines 
+	// describes cheese in queue about to be sent.
+	// ex: 2 lines of garbage in queue, meaning 2 will be accepted / cancelled at some point
+	
+	
+	ChargeMeter(int g) {
+		this.power = g;
+	}
+	
+	ChargeMeter() {
+		this(0);
+	}
+	
+	void send(GameState g) {
+		g.bot.sendLines(power);
+		this.power = 0;
+	}
+	
+	WorldImage draw(int height) {
+		WorldImage meter = new OverlayImage(
+				new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE * height, OutlineMode.OUTLINE, Color.WHITE),
+				new RectangleImage(Board.CELL_SIZE, Board.CELL_SIZE * height, OutlineMode.SOLID, Color.BLACK));
+		WorldImage garbagedisplay = new RectangleImage(Board.CELL_SIZE, Math.min(Board.CELL_SIZE * 20, Board.CELL_SIZE * power), OutlineMode.SOLID, Theme.PURPLE);
+		
+		WorldImage meterwithgarbage = new OverlayOffsetAlign(AlignModeX.CENTER, AlignModeY.BOTTOM, garbagedisplay, 0, 0, meter);
+		
+		return meterwithgarbage;
+	}
+	
+	WorldImage displayLines() {
+		return new TextImage("" + power, 30, Theme.PURPLE);
 	}
 }
