@@ -11734,24 +11734,24 @@
         AlignModeX: () => AlignModeX2,
         AlignModeY: () => AlignModeY2,
         BesideAlignImage: () => BesideAlignImage2,
-        BesideImage: () => BesideImage2,
+        BesideImage: () => BesideImage,
         CircleImage: () => CircleImage,
         Color: () => Color10,
         EllipseImage: () => EllipseImage,
         EmptyImage: () => EmptyImage,
         FontStyle: () => FontStyle,
         FromFileImage: () => FromFileImage3,
-        OutlineMode: () => OutlineMode6,
+        OutlineMode: () => OutlineMode5,
         OverlayImage: () => OverlayImage5,
         OverlayOffsetAlign: () => OverlayOffsetAlign2,
         OverlayOffsetAlignBase: () => OverlayOffsetAlignBase,
         Posn: () => Posn6,
-        RectangleImage: () => RectangleImage6,
+        RectangleImage: () => RectangleImage5,
         RotateImage: () => RotateImage2,
         TextImage: () => TextImage6,
         World: () => World2,
         WorldEnd: () => WorldEnd2,
-        WorldImage: () => WorldImage7,
+        WorldImage: () => WorldImage6,
         WorldScene: () => WorldScene4,
         oneShotWorld: () => oneShotWorld
       });
@@ -11890,7 +11890,7 @@
           return { x: this.x, y: this.y };
         }
       };
-      var WorldImage7 = class {
+      var WorldImage6 = class {
         _pinhole = Posn6.origin;
         constructor() {
         }
@@ -11928,11 +11928,11 @@
         }
       };
       var import_konva = __toESM2(require_lib());
-      var OutlineMode6 = /* @__PURE__ */ ((OutlineMode22) => {
+      var OutlineMode5 = /* @__PURE__ */ ((OutlineMode22) => {
         OutlineMode22[OutlineMode22["SOLID"] = 0] = "SOLID";
         OutlineMode22[OutlineMode22["OUTLINE"] = 1] = "OUTLINE";
         return OutlineMode22;
-      })(OutlineMode6 || {});
+      })(OutlineMode5 || {});
       function setFillAndStroke(node, outlineMode, color) {
         if (outlineMode === 0) {
           node.fillEnabled(true);
@@ -11969,7 +11969,7 @@
           return `[${this.topLeft}:${this.bottomRight}]`;
         }
       };
-      var CircleImage = class _CircleImage extends WorldImage7 {
+      var CircleImage = class _CircleImage extends WorldImage6 {
         constructor(radius, outline, color) {
           super();
           this.radius = radius;
@@ -12003,7 +12003,7 @@
         }
       };
       var import_konva2 = __toESM2(require_lib());
-      var RectangleImage6 = class _RectangleImage extends WorldImage7 {
+      var RectangleImage5 = class _RectangleImage extends WorldImage6 {
         constructor(width, height, outline, color) {
           super();
           this.width = width;
@@ -12042,7 +12042,7 @@
         }
       };
       var import_konva3 = __toESM2(require_lib());
-      var EllipseImage = class _EllipseImage extends WorldImage7 {
+      var EllipseImage = class _EllipseImage extends WorldImage6 {
         constructor(width, height, outline, color) {
           super();
           this.width = width;
@@ -12100,7 +12100,7 @@
         FontStyle2["BOLD_ITALIC"] = "bold italic";
         return FontStyle2;
       })(FontStyle || {});
-      var TextImage6 = class _TextImage extends WorldImage7 {
+      var TextImage6 = class _TextImage extends WorldImage6 {
         _size;
         text;
         color;
@@ -12162,7 +12162,7 @@
         }
       };
       var import_konva5 = __toESM2(require_lib());
-      var OverlayOffsetAlignBase = class _OverlayOffsetAlignBase extends WorldImage7 {
+      var OverlayOffsetAlignBase = class _OverlayOffsetAlignBase extends WorldImage6 {
         constructor(alignX, alignY, top, dx, dy, bot) {
           super();
           this.alignX = alignX;
@@ -12276,7 +12276,7 @@
         }
       };
       var import_konva6 = __toESM2(require_lib());
-      var EmptyImage = class _EmptyImage extends WorldImage7 {
+      var EmptyImage = class _EmptyImage extends WorldImage6 {
         bbox() {
           return new BBox(Posn6.origin, Posn6.origin);
         }
@@ -12315,7 +12315,7 @@
           );
         }
       };
-      var BesideImage2 = class _BesideImage extends OverlayOffsetAlignBase {
+      var BesideImage = class _BesideImage extends OverlayOffsetAlignBase {
         constructor(left, right = new EmptyImage(), ...rest) {
           const rightFolded = rest.length > 0 ? new _BesideImage(right, rest[0], ...rest.slice(1)) : right || new EmptyImage();
           const sz1 = left.size();
@@ -12339,7 +12339,7 @@
       };
       var BesideAlignImage2 = class _BesideAlignImage extends OverlayOffsetAlignBase {
         constructor(alignY, left, right = new EmptyImage(), ...rest) {
-          const rightFolded = rest.length > 0 ? new BesideImage2(right, rest[0], ...rest.slice(1)) : right || new EmptyImage();
+          const rightFolded = rest.length > 0 ? new BesideImage(right, rest[0], ...rest.slice(1)) : right || new EmptyImage();
           const sz1 = left.size();
           const sz2 = rightFolded.size();
           super(3, alignY, left, sz1.x / 2 + sz2.x / 2 + 1, 0, rightFolded);
@@ -12360,7 +12360,7 @@
         }
       };
       var import_konva7 = __toESM2(require_lib());
-      var RotateImage2 = class _RotateImage extends WorldImage7 {
+      var RotateImage2 = class _RotateImage extends WorldImage6 {
         constructor(image, angle) {
           super();
           this.image = image;
@@ -12400,7 +12400,7 @@
         }
       };
       var import_konva8 = __toESM2(require_lib());
-      var FromFileImage3 = class _FromFileImage extends WorldImage7 {
+      var FromFileImage3 = class _FromFileImage extends WorldImage6 {
         constructor(url) {
           super();
           this.url = url;
@@ -12564,6 +12564,8 @@
         }
         onKeyEvent(key) {
         }
+        onKeyReleased(key) {
+        }
         // Mouse events that can be optionally implemented
         onMouseClicked(pos) {
         }
@@ -12591,6 +12593,9 @@
           });
           window.addEventListener("keydown", (e) => {
             this.onKeyEvent(mapKey(e));
+          });
+          window.addEventListener("keyup", (e) => {
+            this.onKeyReleased(mapKey(e));
           });
           this.layer = new import_konva9.default.Layer();
           this.stage.on("click", (e) => {
@@ -12709,10 +12714,13 @@
   // src/util/Meter.ts
   var import_impworld2 = __toESM(require_dist());
   var Meter = class {
-    constructor(place1, place2, decimals) {
-      this.place1 = place1;
-      this.place2 = place2;
-      this.decimals = decimals;
+    place1;
+    place2;
+    decimals;
+    constructor(p1, p2, d) {
+      this.place1 = Math.floor(p1);
+      this.place2 = Math.floor(p2);
+      this.decimals = Math.floor(d);
     }
   };
   var TimeMeter = class extends Meter {
@@ -12838,32 +12846,49 @@
   var FilePaths = {
     audio: {
       sfx: {
-        PLACEPIECE: "placepiece.wav",
-        RECIEVESMALL: "recievesmall.wav",
-        TSS: "tss.wav",
-        TSD: "tsd.wav",
-        TST: "tst.wav",
-        CLEARQUAD: "b2bclearquad.wav",
-        THUNDERMINI: "thundermini.wav"
+        PLACEPIECE: "static/sound/sfx/placepiece.mp3",
+        RECIEVESMALL: "static/sound/sfx/recievesmall.mp3",
+        TSS: "static/sound/sfx/tss.mp3",
+        TSD: "static/sound/sfx/tsd.mp3",
+        TST: "static/sound/sfx/tst.mp3",
+        CLEARQUAD: "static/sound/sfx/b2bclearquad.mp3",
+        THUNDERMINI: "static/sound/sfx/thundermini.mp3"
       },
       songs: {
-        CURTAINCALL: "CurtainCall.wav"
+        CURTAINCALL: "static/sound/songs/CurtainCall.mp3"
       }
     },
     image: {
       bg: {
-        BGSTARRY: "static/bgdefault.jpeg"
+        BGSTARRY: "static/bg/default.jpeg"
       },
       enemies: {
-        SINGERHAPPY: "singerhappy.png"
+        SINGERHAPPY: "static/enemies/singerhappy.png"
       }
     }
   };
   var CELL_SIZE = 20;
 
   // src/ui/AudioPlayer.ts
+  var audioCache = /* @__PURE__ */ new Map();
   var AudioPlayer = class {
-    play(path) {
+    static preload(...urls) {
+      urls.forEach((url) => {
+        if (!audioCache.has(url)) {
+          const audio = new Audio();
+          audio.src = url;
+          audioCache.set(url, audio);
+        }
+      });
+    }
+    static play(url) {
+      if (!audioCache.has(url)) {
+        this.preload(url);
+      }
+      const audio = audioCache.get(url);
+      audio?.play().catch(function(error) {
+        console.error("Error playing audio:", error);
+      });
     }
   };
 
@@ -12895,11 +12920,11 @@
       }
       if (clear[1]) {
         if (clear[0] == 1) {
-          new AudioPlayer().play(FilePaths.audio.sfx.TSS);
+          AudioPlayer.play(FilePaths.audio.sfx.TSS);
         } else if (clear[0] == 2) {
-          new AudioPlayer().play(FilePaths.audio.sfx.TSD);
+          AudioPlayer.play(FilePaths.audio.sfx.TSD);
         } else if (clear[0] == 3) {
-          new AudioPlayer().play(FilePaths.audio.sfx.TST);
+          AudioPlayer.play(FilePaths.audio.sfx.TST);
         }
         return clear[0] * 2;
       }
@@ -12912,7 +12937,7 @@
         Math.min(Math.max(Math.ceil(combo * baseatk / 4), 0.25 * combo), combocap)
       );
       if (clear[0] == 4 && b2b > 0) {
-        new AudioPlayer().play(FilePaths.audio.sfx.CLEARQUAD);
+        AudioPlayer.play(FilePaths.audio.sfx.CLEARQUAD);
       }
       return baseatk + comboval + Math.max(0, _AttackTable.b2bFactor(b2b - 1));
     }
@@ -13036,6 +13061,15 @@
         }
       }
       this.position = new import_impworld4.Posn(this.position.x, b.height - this.getEmptyLineCountY());
+    }
+    moveLeftInf(b) {
+      for (let i = 1; i < this.position.x + 4; i++) {
+        if (this.checkOverlap(b, this.piece.first, new import_impworld4.Posn(-i, 0))) {
+          this.position = new import_impworld4.Posn(this.position.x - i + 1, this.position.y);
+          return;
+        }
+      }
+      this.position = new import_impworld4.Posn(-this.getEmptyLineCountFromLeft(), this.position.y);
     }
     moveRightInf(b) {
       for (let i = this.position.x; i < b.width; i++) {
@@ -14010,7 +14044,7 @@
       if (this.garbage) {
         this.garbage.garbage += lines;
       }
-      new AudioPlayer().play(FilePaths.audio.sfx.RECIEVESMALL);
+      AudioPlayer.play(FilePaths.audio.sfx.RECIEVESMALL);
     }
     placePiece(p) {
       for (let i = 0; i < 4; i++) {
@@ -14120,9 +14154,9 @@
         }
       }
       if (displayatk >= 16) {
-        new AudioPlayer().play(FilePaths.audio.sfx.THUNDERMINI);
+        AudioPlayer.play(FilePaths.audio.sfx.THUNDERMINI);
       } else if (displayatk >= 10) {
-        new AudioPlayer().play(FilePaths.audio.sfx.THUNDERMINI);
+        AudioPlayer.play(FilePaths.audio.sfx.THUNDERMINI);
       }
       if (addcombo) {
         this.currentcombo += 1;
@@ -14292,7 +14326,7 @@
     // in ms
     static METER_SPACING = CELL_SIZE * 2;
     static FIRST_METER_SPACING = CELL_SIZE * 4;
-    static GAME_SPEED = 1e-3;
+    static GAME_SPEED = 0.1;
     static INVERT_SPEED = Math.floor(1 / _GameState.GAME_SPEED);
     static DECO_DURATION = 2e3;
     static SCREEN_WIDTH = document.getElementById("world")?.clientWidth ?? 500;
@@ -14322,8 +14356,8 @@
       }
       s.placeImageXY(
         this.board.bgimage,
-        Math.round(_GameState.SCREEN_WIDTH / 2),
-        Math.round(_GameState.SCREEN_HEIGHT / 2)
+        Math.round(this.board.bgimage.getWidth() / 2),
+        Math.round(this.board.bgimage.getHeight() / 2)
       );
       const linemeter = new import_impworld11.TextImage("LINES:  " + this.stats.lines, import_impworld11.Color.WHITE);
       const atkmeter = new AtkMeter(this.stats.atk, time).getMeterVal();
@@ -14332,15 +14366,15 @@
       const b2bmeter = this.board.b2b > 1 ? new import_impworld11.TextImage("B2B X" + (this.board.b2b - 1), import_impworld11.Color.WHITE) : new import_impworld11.TextImage("", import_impworld11.Color.WHITE);
       const combometer = this.board.currentcombo > 1 ? new import_impworld11.TextImage(this.board.currentcombo - 1 + " COMBO", import_impworld11.Color.WHITE) : new import_impworld11.TextImage("", import_impworld11.Color.WHITE);
       const songname = new import_impworld11.TextImage(pickRandom(Object.keys(FilePaths.audio.songs)), import_impworld11.Color.WHITE);
-      for (let i = 0; i < this.board.height; i++) {
-        const mapped = this.board.residue[i].map((r) => this.board.drawResidue(r));
-        const composedImage = new import_impworld11.BesideImage(mapped[0], ...mapped.slice(1));
-        s.placeImageXY(
-          composedImage,
-          this.board.width / 2 * CELL_SIZE,
-          i * CELL_SIZE + CELL_SIZE / 2
-        );
-      }
+      this.board.residue.forEach((row, y) => {
+        row.forEach((cell, x) => {
+          s.placeImageXY(
+            this.board.drawResidue(cell).movePinhole(-CELL_SIZE / 2, -CELL_SIZE / 2),
+            x * CELL_SIZE,
+            y * CELL_SIZE
+          );
+        });
+      });
       s.placeImageXY(
         this.board.garbage.draw(this.board.height),
         this.board.width * CELL_SIZE + CELL_SIZE / 2,
@@ -14453,6 +14487,7 @@
         case " ":
           this.board.fallingpiece.hardDrop(this.board);
           this.stats.pieces += 1;
+          AudioPlayer.play(FilePaths.audio.sfx.PLACEPIECE);
           const tosend = this.board.removeRows(this);
           this.stats.atk += tosend;
           this.spin = this.board.fallingpiece.hasSpun(this.board);
@@ -14520,16 +14555,64 @@
           this.stats = new GameStats();
       }
     }
+    onKeyReleased(key) {
+      switch (key) {
+        case "down":
+          this.sdfactive = false;
+          break;
+        case "left":
+          this.arractiveleft = false;
+          this.leftkeypressed = false;
+          this.keyheldtime = void 0;
+          break;
+        case "right":
+          this.arractiveright = false;
+          this.rightkeypressed = false;
+          this.keyheldtime = void 0;
+          break;
+      }
+    }
+    onTick() {
+      let time = Date.now() - this.stats.starttime;
+      if ((this.rightkeypressed || this.leftkeypressed) && this.keyheldtime === void 0) {
+        this.keyheldtime = Date.now();
+      }
+      let dascheck = this.keyheldtime !== void 0 ? Date.now() - this.keyheldtime >= _GameState.DAS : false;
+      if (this.sdfactive && _GameState.SDF <= 0) {
+        this.board.fallingpiece.softDropInf(this.board);
+      } else if (this.sdfactive && time % _GameState.SDF === 0) {
+        this.board.fallingpiece.softDrop(this.board);
+      }
+      if (this.leftkeypressed && _GameState.ARR > 0 && time % _GameState.ARR === 0 && dascheck) {
+        this.board.fallingpiece.moveLeft(this.board);
+      } else if (_GameState.ARR <= 0 && dascheck && this.leftkeypressed) {
+        this.board.fallingpiece.moveLeftInf(this.board);
+      }
+      if (this.rightkeypressed && _GameState.ARR > 0 && time % _GameState.ARR === 0 && dascheck) {
+        this.board.fallingpiece.moveRight(this.board);
+      } else if (_GameState.ARR <= 0 && dascheck && this.rightkeypressed) {
+        this.board.fallingpiece.moveRightInf(this.board);
+      }
+    }
   };
 
   // src/index.ts
   var import_impworld12 = __toESM(require_dist());
-  import_impworld12.FromFileImage.preload("static/bgdefault.jpeg").then(() => {
+  AudioPlayer.preload(
+    ...Object.values(FilePaths.audio.sfx),
+    ...Object.values(FilePaths.audio.songs)
+  );
+  import_impworld12.FromFileImage.preload(
+    ...Object.values(FilePaths.image.bg),
+    ...Object.values(FilePaths.image.enemies)
+  ).then(() => {
     try {
       const game = new GameState();
       game.bigBang(GameState.SCREEN_WIDTH, GameState.SCREEN_HEIGHT, GameState.GAME_SPEED);
     } catch (e) {
       console.error(e);
     }
+  }).catch((error) => {
+    console.error("Preload failed", error);
   });
 })();
