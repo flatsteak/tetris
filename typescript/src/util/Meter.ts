@@ -2,7 +2,15 @@ import { GameState } from '@/GameState';
 import { Color, TextImage, WorldImage } from 'impworld';
 
 abstract class Meter {
-  constructor(protected place1: number, protected place2: number, protected decimals: number) {}
+  place1: number;
+  place2: number;
+  decimals: number;
+
+  constructor(p1: number, p2: number, d: number) {
+    this.place1 = Math.floor(p1);
+    this.place2 = Math.floor(p2);
+    this.decimals = Math.floor(d);
+  }
 
   abstract getMeterVal(): WorldImage;
 }

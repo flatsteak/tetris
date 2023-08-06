@@ -1,26 +1,26 @@
 export const FilePaths = {
   audio: {
     sfx: {
-      PLACEPIECE: 'placepiece.wav',
-      RECIEVESMALL: 'recievesmall.wav',
-      TSS: 'tss.wav',
-      TSD: 'tsd.wav',
-      TST: 'tst.wav',
-      CLEARQUAD: 'b2bclearquad.wav',
-      THUNDERMINI: 'thundermini.wav',
+      PLACEPIECE: 'static/sound/sfx/placepiece.mp3',
+      RECIEVESMALL: 'static/sound/sfx/recievesmall.mp3',
+      TSS: 'static/sound/sfx/tss.mp3',
+      TSD: 'static/sound/sfx/tsd.mp3',
+      TST: 'static/sound/sfx/tst.mp3',
+      CLEARQUAD: 'static/sound/sfx/b2bclearquad.mp3',
+      THUNDERMINI: 'static/sound/sfx/thundermini.mp3',
     },
     songs: {
-      CURTAINCALL: 'CurtainCall.wav',
+      CURTAINCALL: 'static/sound/songs/CurtainCall.mp3',
     },
   },
   image: {
     bg: {
-      BGSTARRY: 'static/bgdefault.jpeg',
+      BGSTARRY: 'static/bg/default.jpeg',
     },
     enemies: {
-      SINGERHAPPY: 'singerhappy.png',
+      SINGERHAPPY: 'static/enemies/singerhappy.png',
     },
   },
-}
+} as const;
 
 export const CELL_SIZE = 20;

@@ -92,7 +92,7 @@ export class Board {
     if (this.garbage) {
       this.garbage.garbage += lines;
     }
-    new AudioPlayer().play(FilePaths.audio.sfx.RECIEVESMALL);
+    AudioPlayer.play(FilePaths.audio.sfx.RECIEVESMALL);
   }
 
   placePiece(p: APiece): void {
@@ -215,12 +215,12 @@ export class Board {
     }
 
     if (displayatk >= 16) {
-      new AudioPlayer().play(FilePaths.audio.sfx.THUNDERMINI);
+      AudioPlayer.play(FilePaths.audio.sfx.THUNDERMINI);
       // Animation flashlow = new Flashwave(placeat);
       // flashlow.start(placeat);
       // this.anims.add(flashlow);
     } else if (displayatk >= 10) {
-      new AudioPlayer().play(FilePaths.audio.sfx.THUNDERMINI);
+      AudioPlayer.play(FilePaths.audio.sfx.THUNDERMINI);
       // Animation flashlow = new Flashwave(placeat);
       // flashlow.start(placeat);
       // this.anims.add(flashlow);

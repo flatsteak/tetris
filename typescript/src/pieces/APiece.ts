@@ -125,6 +125,16 @@ export abstract class APiece {
     this.position = new Posn(this.position.x, b.height - this.getEmptyLineCountY());
   }
 
+  moveLeftInf(b: Board) {
+		for (let i = 1; i < this.position.x + 4; i++) {
+			if (this.checkOverlap(b, this.piece.first, new Posn(-i, 0))) {
+				this.position = new Posn(this.position.x - i + 1, this.position.y);
+				return;
+			}
+		}
+		this.position = new Posn(-this.getEmptyLineCountFromLeft(), this.position.y);
+	}
+
   moveRightInf(b: Board): void {
     for (let i = this.position.x; i < b.width; i++) {
       if (this.checkOverlap(b, this.piece.first, new Posn(i - this.position.x + 1, 0))) {

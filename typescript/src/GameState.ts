@@ -7,15 +7,11 @@ import { GameStats } from '@/util/GameStats';
 import { AtkMeter, PiecesMeter, TimeMeter } from '@/util/Meter';
 import { pickRandom } from '@/util/pickRandom';
 import {
-  BesideImage,
   Color,
-  OutlineMode,
   Posn,
-  RectangleImage,
   TextImage,
   World,
   WorldEnd,
-  WorldImage,
   WorldScene,
 } from 'impworld';
 import { Residue } from './pieces/Residue';
@@ -47,7 +43,7 @@ export class GameState extends World {
   static METER_SPACING = CELL_SIZE * 2;
   static FIRST_METER_SPACING = CELL_SIZE * 4;
 
-  static GAME_SPEED = 0.001;
+  static GAME_SPEED = .1;
   static INVERT_SPEED = Math.floor(1 / GameState.GAME_SPEED);
 
   static DECO_DURATION = 2000;
@@ -84,8 +80,8 @@ export class GameState extends World {
     }
     s.placeImageXY(
       this.board.bgimage,
-      Math.round(GameState.SCREEN_WIDTH / 2),
-      Math.round(GameState.SCREEN_HEIGHT / 2),
+      Math.round(this.board.bgimage.getWidth() / 2),
+      Math.round(this.board.bgimage.getHeight() / 2),
     );
 
     const linemeter = new TextImage('LINES:  ' + this.stats.lines, Color.WHITE);
@@ -103,15 +99,15 @@ export class GameState extends World {
     const songname = new TextImage(pickRandom(Object.keys(FilePaths.audio.songs)), Color.WHITE);
 
     // Draw the existing residue
-    for (let i = 0; i < this.board.height; i++) {
-      const mapped = this.board.residue[i].map((r) => this.board.drawResidue(r));
-      const composedImage = new BesideImage(mapped[0], ...mapped.slice(1));
-      s.placeImageXY(
-        composedImage,
-        (this.board.width / 2) * CELL_SIZE,
-        i * CELL_SIZE + CELL_SIZE / 2,
-      );
-    }
+    this.board.residue.forEach((row, y) => {
+      row.forEach((cell, x) => {
+        s.placeImageXY(
+          this.board.drawResidue(cell).movePinhole(-CELL_SIZE / 2, -CELL_SIZE / 2),
+          x * CELL_SIZE,
+          y * CELL_SIZE,
+        );
+      });
+    })
 
     s.placeImageXY(
       this.board.garbage.draw(this.board.height),
@@ -234,7 +230,7 @@ export class GameState extends World {
     return s;
   }
 
-  onKeyEvent(key: string) {
+  protected onKeyEvent(key: string) {
     switch (key) {
       case 'left':
         this.board.fallingpiece.moveLeft(this.board);
@@ -250,7 +246,7 @@ export class GameState extends World {
       case ' ':
         this.board.fallingpiece.hardDrop(this.board);
         this.stats.pieces += 1;
-        // new AudioPlayer().play(FilePaths.PLACEPIECE);
+        AudioPlayer.play(FilePaths.audio.sfx.PLACEPIECE);
         const tosend = this.board.removeRows(this);
         this.stats.atk += tosend;
         // this.bot.sendLines(tosend);
@@ -325,6 +321,65 @@ export class GameState extends World {
       case 'r':
         this.board = new Board();
         this.stats = new GameStats();
+    }
+  }
+
+  protected onKeyReleased(key: string) {
+    switch (key) {
+      case 'down':
+        this.sdfactive = false;
+        break;
+      case 'left':
+        this.arractiveleft = false;
+        this.leftkeypressed = false;
+        this.keyheldtime = undefined;
+        break;
+      case 'right':
+        this.arractiveright = false;
+        this.rightkeypressed = false;
+        this.keyheldtime = undefined;
+        break;
+    }
+  }
+
+  protected onTick() {
+    let time: number = Date.now() - this.stats.starttime;
+
+    /*
+    this.bot.makeMove(this);
+
+    for (let i = 0; i < this.board.anims.length; i++) {
+      let a: Animation = this.board.anims[i];
+      if (a.isEnded()) {
+        this.board.anims.splice(i, 1);
+        i--; // Decrement index to account for the removed element
+      }
+    }
+    */
+
+    if ((this.rightkeypressed || this.leftkeypressed) && this.keyheldtime === undefined) {
+      this.keyheldtime = Date.now();
+    }
+
+    let dascheck: boolean =
+      this.keyheldtime !== undefined ? Date.now() - this.keyheldtime >= GameState.DAS : false;
+
+    if (this.sdfactive && GameState.SDF <= 0) {
+      this.board.fallingpiece.softDropInf(this.board);
+    } else if (this.sdfactive && time % GameState.SDF === 0) {
+      this.board.fallingpiece.softDrop(this.board);
+    }
+
+    if (this.leftkeypressed && GameState.ARR > 0 && time % GameState.ARR === 0 && dascheck) {
+      this.board.fallingpiece.moveLeft(this.board);
+    } else if (GameState.ARR <= 0 && dascheck && this.leftkeypressed) {
+      this.board.fallingpiece.moveLeftInf(this.board);
+    }
+
+    if (this.rightkeypressed && GameState.ARR > 0 && time % GameState.ARR === 0 && dascheck) {
+      this.board.fallingpiece.moveRight(this.board);
+    } else if (GameState.ARR <= 0 && dascheck && this.rightkeypressed) {
+      this.board.fallingpiece.moveRightInf(this.board);
     }
   }
 }

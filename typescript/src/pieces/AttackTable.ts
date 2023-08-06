@@ -34,11 +34,11 @@ export class AttackTable {
     }
     if (clear[1]) {
       if (clear[0] == 1) {
-        new AudioPlayer().play(FilePaths.audio.sfx.TSS);
+        AudioPlayer.play(FilePaths.audio.sfx.TSS);
       } else if (clear[0] == 2) {
-        new AudioPlayer().play(FilePaths.audio.sfx.TSD);
+        AudioPlayer.play(FilePaths.audio.sfx.TSD);
       } else if (clear[0] == 3) {
-        new AudioPlayer().play(FilePaths.audio.sfx.TST);
+        AudioPlayer.play(FilePaths.audio.sfx.TST);
       }
       return clear[0] * 2;
     }
@@ -53,7 +53,7 @@ export class AttackTable {
     );
 
     if (clear[0] == 4 && b2b > 0) {
-      new AudioPlayer().play(FilePaths.audio.sfx.CLEARQUAD);
+      AudioPlayer.play(FilePaths.audio.sfx.CLEARQUAD);
     }
 
     return baseatk + comboval + Math.max(0, AttackTable.b2bFactor(b2b - 1));
