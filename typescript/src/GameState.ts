@@ -330,10 +330,10 @@ export class GameState extends World {
   protected onGesture(name: 'swipeleft' | 'swiperight' | 'swipeup' | 'swipedown') {
     this.onKeyEvent(
       {
-        swipeleft: 'ArrowLeft',
-        swiperight: 'ArrowRight',
-        swipeup: 'ArrowUp',
-        swipedown: 'ArrowDown',
+        swipeleft: 'left',
+        swiperight: 'right',
+        swipeup: 'up',
+        swipedown: 'down',
       }[name],
     );
   }
