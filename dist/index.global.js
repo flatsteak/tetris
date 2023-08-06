@@ -14715,10 +14715,10 @@
     onGesture(name) {
       this.onKeyEvent(
         {
-          swipeleft: "ArrowLeft",
-          swiperight: "ArrowRight",
-          swipeup: "ArrowUp",
-          swipedown: "ArrowDown"
+          swipeleft: "left",
+          swiperight: "right",
+          swipeup: "up",
+          swipedown: "down"
         }[name]
       );
     }
