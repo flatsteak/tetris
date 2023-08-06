@@ -276,7 +276,7 @@ export class Board {
       case Residue.I:
         return this.t.i;
       case Residue.J:
-        return this.t.j.copy();
+        return this.t.j;
       case Residue.L:
         return this.t.l;
       case Residue.T:

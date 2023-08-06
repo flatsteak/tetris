@@ -115,6 +115,7 @@ export class GameState extends World {
       (this.board.height / 2) * CELL_SIZE,
     );
 
+    /*
     const shadow = this.board.fallingpiece;
     const storedpos = new Posn(
       this.board.fallingpiece.position.x,
@@ -141,6 +142,7 @@ export class GameState extends World {
 
     shadow.drawPiece(this.board.t, s, this.board.t.shadow);
     shadow.position = storedpos;
+    */
 
     this.board.fallingpiece.drawPiece(
       this.board.t,
@@ -156,8 +158,8 @@ export class GameState extends World {
     if (this.board.hold) {
       const p = this.board.tetriminoToPiece(this.board.hold);
       p.position = new Posn(
-        Math.floor((width + this.board.t.holdbox.getWidth() / 2 - CELL_SIZE / 8) / CELL_SIZE),
-        Math.floor(this.board.t.holdbox.getHeight() / 2 / CELL_SIZE - 1),
+        11.25,
+        0.5,
       );
       p.drawPiece(this.board.t, s, this.board.pieceToImage(p));
     }
@@ -256,6 +258,7 @@ export class GameState extends World {
         this.board.holdPiece();
         break;
       case 'up':
+      case 'x':
         const testsright = this.board.fallingpiece.getKickTests(Rotation.CLOCKWISE);
         let moved = false;
         for (let i = 0; i < testsright.length; i++) {

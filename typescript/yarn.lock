@@ -1240,12 +1240,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"impworld@npm:^1.2.4":
-  version: 1.2.4
-  resolution: "impworld@npm:1.2.4"
+"impworld@npm:^1.2.5":
+  version: 1.2.5
+  resolution: "impworld@npm:1.2.5"
   dependencies:
     konva: ^9.2.0
-  checksum: bc825f9c826075b38e429ebe85923f19bd811ad33f3bbd27ddf4bb046fbf2eb9c6e51f298c09a0f64acaa6d4ffce86d7a077bf28e35987558c32fcf19a6e72de
+  checksum: 789c1eb47866dcb9d3d60258ce0d9dbecab65042c8450bfe689f1d92bab2383b805f92ac43ae578d87a8d5a92a50a5ddca21e127be9fc21e80146b4d7116a34d
   languageName: node
   linkType: hard
 
@@ -2346,7 +2346,7 @@ __metadata:
   dependencies:
     "@openapi-typescript-infra/coconfig": ^3.3.6
     coconfig: ^0.13.3
-    impworld: ^1.2.4
+    impworld: ^1.2.5
     tsup: ^7.2.0
   languageName: unknown
   linkType: soft

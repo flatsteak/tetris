@@ -34,7 +34,7 @@ export class ThemePool {
         OutlineMode.OUTLINE,
         Color.WHITE,
       ),
-      new RectangleImage(CELL_SIZE * 4, CELL_SIZE * 3, OutlineMode.SOLID, Color.BLACK),
+      new RectangleImage(CELL_SIZE * 5, CELL_SIZE * 3.5, OutlineMode.SOLID, Color.BLACK),
     ),
     new OverlayImage(
       new RectangleImage(CELL_SIZE, CELL_SIZE, OutlineMode.OUTLINE, Color.WHITE),
@@ -91,8 +91,8 @@ export class ThemePool {
     ),
     new OverlayImage(
       new RectangleImage(
-        CELL_SIZE * 4,
-        CELL_SIZE * 3,
+        CELL_SIZE * 5,
+        CELL_SIZE * 3.5,
         OutlineMode.OUTLINE,
         Color.WHITE,
       ),
@@ -124,8 +124,8 @@ export class ThemePool {
     ),
     new OverlayImage(
       new RectangleImage(
-        CELL_SIZE * 4,
-        CELL_SIZE * 3,
+        CELL_SIZE * 5,
+        CELL_SIZE * 3.5,
         OutlineMode.OUTLINE,
         Color.WHITE,
       ),
