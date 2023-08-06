@@ -11984,7 +11984,7 @@
           return new Posn6(this.radius * 2, this.radius * 2);
         }
         getReusableIds() {
-          return [`${this.radius}-${this.outline}`, `${this.radius}`, "any"];
+          return [`${this.radius}-${this.outline}`];
         }
         createNode(ctx) {
           const node = ctx.previousNodeCache?.getReusableNode(import_konva.default.Circle, this.getReusableIds());
@@ -12019,7 +12019,7 @@
           return new Posn6(this.width, this.height);
         }
         getReusableIds() {
-          return [`${this.width}-${this.height}-${this.outline}`, `${this.width}-${this.height}`, "any"];
+          return [`${this.width}-${this.height}-${this.outline}`];
         }
         createNode(ctx) {
           const node = ctx.previousNodeCache?.getReusableNode(import_konva2.default.Rect, this.getReusableIds());
@@ -12058,7 +12058,7 @@
           return new Posn6(this.width, this.height);
         }
         getReusableIds() {
-          return [`${this.width}-${this.height}-${this.outline}`, `${this.width}-${this.height}`, "any"];
+          return [`${this.width}-${this.height}-${this.outline}`];
         }
         createNode(ctx) {
           const node = ctx.previousNodeCache?.getReusableNode(import_konva3.default.Ellipse, this.getReusableIds());
@@ -13753,7 +13753,7 @@
           import_impworld8.OutlineMode.OUTLINE,
           import_impworld8.Color.WHITE
         ),
-        new import_impworld8.RectangleImage(CELL_SIZE * 4, CELL_SIZE * 3, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
+        new import_impworld8.RectangleImage(CELL_SIZE * 5, CELL_SIZE * 3.5, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
       ),
       new import_impworld8.OverlayImage(
         new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
@@ -13818,8 +13818,8 @@
       ),
       new import_impworld8.OverlayImage(
         new import_impworld8.RectangleImage(
-          CELL_SIZE * 4,
-          CELL_SIZE * 3,
+          CELL_SIZE * 5,
+          CELL_SIZE * 3.5,
           import_impworld8.OutlineMode.OUTLINE,
           import_impworld8.Color.WHITE
         ),
@@ -13851,8 +13851,8 @@
       ),
       new import_impworld8.OverlayImage(
         new import_impworld8.RectangleImage(
-          CELL_SIZE * 4,
-          CELL_SIZE * 3,
+          CELL_SIZE * 5,
+          CELL_SIZE * 3.5,
           import_impworld8.OutlineMode.OUTLINE,
           import_impworld8.Color.WHITE
         ),
@@ -14202,7 +14202,7 @@
         case 2 /* I */:
           return this.t.i;
         case 6 /* J */:
-          return this.t.j.copy();
+          return this.t.j;
         case 5 /* L */:
           return this.t.l;
         case 4 /* T */:
@@ -14380,29 +14380,6 @@
         this.board.width * CELL_SIZE + CELL_SIZE / 2,
         this.board.height / 2 * CELL_SIZE
       );
-      const shadow = this.board.fallingpiece;
-      const storedpos = new import_impworld11.Posn(
-        this.board.fallingpiece.position.x,
-        this.board.fallingpiece.position.y
-      );
-      for (let i = shadow.position.y; i < this.board.height - 1; i++) {
-        if (this.board.fallingpiece.checkOverlap(
-          this.board,
-          this.board.fallingpiece.piece.first,
-          new import_impworld11.Posn(0, i - shadow.position.y + 1)
-        )) {
-          shadow.position = new import_impworld11.Posn(shadow.position.x, i);
-          break;
-        }
-      }
-      if (shadow.position == storedpos) {
-        shadow.position = new import_impworld11.Posn(
-          shadow.position.x,
-          this.board.height - shadow.getEmptyLineCountY()
-        );
-      }
-      shadow.drawPiece(this.board.t, s, this.board.t.shadow);
-      shadow.position = storedpos;
       this.board.fallingpiece.drawPiece(
         this.board.t,
         s,
@@ -14416,8 +14393,8 @@
       if (this.board.hold) {
         const p = this.board.tetriminoToPiece(this.board.hold);
         p.position = new import_impworld11.Posn(
-          Math.floor((width + this.board.t.holdbox.getWidth() / 2 - CELL_SIZE / 8) / CELL_SIZE),
-          Math.floor(this.board.t.holdbox.getHeight() / 2 / CELL_SIZE - 1)
+          11.25,
+          0.5
         );
         p.drawPiece(this.board.t, s, this.board.pieceToImage(p));
       }
@@ -14496,6 +14473,7 @@
           this.board.holdPiece();
           break;
         case "up":
+        case "x":
           const testsright = this.board.fallingpiece.getKickTests(0 /* CLOCKWISE */);
           let moved = false;
           for (let i = 0; i < testsright.length; i++) {
