@@ -11737,21 +11737,23 @@
         BesideImage: () => BesideImage2,
         CircleImage: () => CircleImage,
         Color: () => Color10,
-        CombinationDirection: () => CombinationDirection,
-        CombinationImage: () => CombinationImage,
+        EllipseImage: () => EllipseImage,
+        EmptyImage: () => EmptyImage,
         FontStyle: () => FontStyle,
         FromFileImage: () => FromFileImage3,
-        OutlineMode: () => OutlineMode5,
+        OutlineMode: () => OutlineMode6,
         OverlayImage: () => OverlayImage5,
         OverlayOffsetAlign: () => OverlayOffsetAlign2,
+        OverlayOffsetAlignBase: () => OverlayOffsetAlignBase,
         Posn: () => Posn6,
-        RectangleImage: () => RectangleImage5,
+        RectangleImage: () => RectangleImage6,
         RotateImage: () => RotateImage2,
         TextImage: () => TextImage6,
         World: () => World2,
         WorldEnd: () => WorldEnd2,
         WorldImage: () => WorldImage7,
-        WorldScene: () => WorldScene4
+        WorldScene: () => WorldScene4,
+        oneShotWorld: () => oneShotWorld
       });
       module.exports = __toCommonJS(src_exports);
       var FACTOR = 0.7;
@@ -11787,12 +11789,23 @@
           }
           return parseInt(alpha, 16);
         }
-        brighter() {
+        withAlpha(a) {
+          return new _Color(this.getRed(), this.getGreen(), this.getBlue(), a);
+        }
+        add(r, g, b) {
+          return new _Color(
+            this.getRed() + r,
+            this.getGreen() + (g === void 0 ? r : g),
+            this.getBlue() + (b === void 0 ? r : b),
+            this.getAlpha()
+          );
+        }
+        brighter(by = FACTOR) {
           let r = this.getRed();
           let g = this.getGreen();
           let b = this.getBlue();
           const alpha = this.getAlpha();
-          const i = Math.floor(1 / (1 - FACTOR));
+          const i = Math.floor(1 / (1 - by));
           if (r === 0 && g === 0 && b === 0) {
             return new _Color(i, i, i, alpha);
           }
@@ -11806,9 +11819,9 @@
             b = i;
           }
           return new _Color(
-            Math.min(Math.floor(r / FACTOR), 255),
-            Math.min(Math.floor(g / FACTOR), 255),
-            Math.min(Math.floor(b / FACTOR), 255),
+            Math.min(Math.floor(r / by), 255),
+            Math.min(Math.floor(g / by), 255),
+            Math.min(Math.floor(b / by), 255),
             alpha
           );
         }
@@ -11841,24 +11854,31 @@
         constructor(x, y) {
           this.x = x;
           this.y = y;
-          this.x = Math.round(x);
-          this.y = Math.round(y);
+          if (x === 0) {
+            this.x = 0;
+          }
+          if (y === 0) {
+            this.y = 0;
+          }
         }
         static origin = new _Posn(0, 0);
         equals(other) {
           return this.x === other.x && this.y === other.y;
         }
+        round() {
+          return new _Posn(Math.round(this.x), Math.round(this.y));
+        }
         plus(other) {
           return this.moved(other.x, other.y);
         }
         minus(other) {
-          return new _Posn(Math.round(this.x - other.x), Math.round(this.y - other.y));
+          return this.moved(-other.x, -other.y);
         }
         moved(dx, dy) {
           return new _Posn(this.x + dx, this.y + dy);
         }
         dividedBy(nx, ny) {
-          return new _Posn(Math.round(this.x / nx), Math.round(this.y / (ny || nx)));
+          return new _Posn(this.x / nx, this.y / (ny || nx));
         }
         times(mx, my) {
           return new _Posn(this.x * mx, this.y * (my === void 0 ? mx : my));
@@ -11871,14 +11891,23 @@
         }
       };
       var WorldImage7 = class {
-        constructor(pinhole = Posn6.origin) {
-          this.pinhole = pinhole;
+        _pinhole = Posn6.origin;
+        constructor() {
         }
-        getPinhole() {
-          if (!this.pinhole) {
-            return this.size().dividedBy(2);
-          }
-          return this.pinhole;
+        /**
+         * OMG pinholes. So, a pinhole value of 0,0 means that the pinhole is in the
+         * CENTER of the image. So the pinhole is a relative coordinate (to the center)
+         * not an absolute coordinate (which one would typically consider top left in
+         * the graphics world)
+         */
+        get pinhole() {
+          return this._pinhole;
+        }
+        set pinhole(pinhole) {
+          this._pinhole = pinhole;
+        }
+        size() {
+          return this.bbox().size();
         }
         getWidth() {
           return this.size().x;
@@ -11887,7 +11916,10 @@
           return this.size().y;
         }
         movePinhole(dx, dy) {
-          return this.movePinholeTo(this.pinhole.moved(dx, dy));
+          if (typeof dx === "number") {
+            return this.movePinholeTo(this.pinhole.moved(dx, dy));
+          }
+          return this.movePinholeTo(this.pinhole.plus(dx));
         }
         movePinholeTo(pos) {
           const copy = this.copy();
@@ -11896,194 +11928,169 @@
         }
       };
       var import_konva = __toESM2(require_lib());
-      var CombinationDirection = /* @__PURE__ */ ((CombinationDirection2) => {
-        CombinationDirection2[CombinationDirection2["LeftToRight"] = 0] = "LeftToRight";
-        CombinationDirection2[CombinationDirection2["TopToBottom"] = 1] = "TopToBottom";
-        CombinationDirection2[CombinationDirection2["Overlay"] = 2] = "Overlay";
-        return CombinationDirection2;
-      })(CombinationDirection || {});
-      var CombinationImage = class _CombinationImage extends WorldImage7 {
-        constructor(objects, direction, alignX = 0, alignY = 1) {
-          super();
-          this.objects = objects;
-          this.direction = direction;
-          this.alignX = alignX;
-          this.alignY = alignY;
+      var OutlineMode6 = /* @__PURE__ */ ((OutlineMode22) => {
+        OutlineMode22[OutlineMode22["SOLID"] = 0] = "SOLID";
+        OutlineMode22[OutlineMode22["OUTLINE"] = 1] = "OUTLINE";
+        return OutlineMode22;
+      })(OutlineMode6 || {});
+      function setFillAndStroke(node, outlineMode, color) {
+        if (outlineMode === 0) {
+          node.fillEnabled(true);
+          node.fill(color.toString());
+        } else {
+          node.fillEnabled(false);
+        }
+        node.stroke(color.toString());
+      }
+      var BBox = class _BBox {
+        constructor(topLeft, bottomRight) {
+          this.topLeft = topLeft;
+          this.bottomRight = bottomRight;
+        }
+        combine(other) {
+          return new _BBox(
+            new Posn6(
+              Math.min(this.topLeft.x, other.topLeft.x),
+              Math.min(this.topLeft.y, other.topLeft.y)
+            ),
+            new Posn6(
+              Math.max(this.bottomRight.x, other.bottomRight.x),
+              Math.max(this.bottomRight.y, other.bottomRight.y)
+            )
+          );
+        }
+        equals(other) {
+          return this.topLeft.equals(other.topLeft) && this.bottomRight.equals(other.bottomRight);
         }
         size() {
-          return this.objects.reduce((acc, obj) => {
-            const sz = obj.size();
-            switch (this.direction) {
-              case 0:
-                return new Posn6(acc.x + sz.x, Math.max(acc.y, sz.y));
-              case 1:
-                return new Posn6(Math.max(acc.x, sz.x), acc.y + sz.y);
-              case 2:
-                return new Posn6(Math.max(acc.x, sz.x), Math.max(acc.y, sz.y));
-              default:
-                throw new Error("Invalid direction");
-            }
-          }, Posn6.origin);
-          return Posn6.origin;
+          return this.bottomRight.minus(this.topLeft);
         }
-        getItemsToRender(ctx, position) {
-          let spot = Posn6.origin;
-          const group = new import_konva.default.Group({
-            x: position.x,
-            y: position.y
-          });
-          for (const obj of this.objects) {
-            group.add(obj.getItemsToRender(ctx, spot));
-            switch (this.direction) {
-              case 0:
-                spot = spot.moved(obj.size().x, 0);
-                break;
-              case 1:
-                spot = spot.moved(0, obj.size().y);
-                break;
-              case 2:
-                break;
-              default:
-                throw new Error("Invalid direction");
-            }
-          }
-          return group;
-        }
-        copy() {
-          return new _CombinationImage(
-            this.objects.map((obj) => obj.copy()),
-            this.direction,
-            this.alignX,
-            this.alignY
-          );
+        toString() {
+          return `[${this.topLeft}:${this.bottomRight}]`;
         }
       };
-      var BesideImage2 = class _BesideImage extends CombinationImage {
-        constructor(...images) {
-          super(
-            images,
-            0
-            /* LeftToRight */
-          );
-        }
-        copy() {
-          return new _BesideImage(...this.objects);
-        }
-      };
-      var AboveImage = class _AboveImage extends CombinationImage {
-        constructor(...images) {
-          super(
-            images,
-            1
-            /* TopToBottom */
-          );
-        }
-        copy() {
-          return new _AboveImage(...this.objects);
-        }
-      };
-      var OverlayImage5 = class _OverlayImage extends CombinationImage {
-        constructor(...images) {
-          super(
-            images,
-            2
-            /* Overlay */
-          );
-        }
-        copy() {
-          return new _OverlayImage(...this.objects);
-        }
-      };
-      var BesideAlignImage2 = class _BesideAlignImage extends CombinationImage {
-        constructor(alignY, ...images) {
-          super(images, 0, void 0, alignY);
-        }
-        copy() {
-          return new _BesideAlignImage(this.alignY, ...this.objects);
-        }
-      };
-      var AboveAlignImage = class _AboveAlignImage extends CombinationImage {
-        constructor(alignX, ...images) {
-          super(images, 0, alignX, void 0);
-        }
-        copy() {
-          return new _AboveAlignImage(this.alignX, ...this.objects);
-        }
-      };
-      var import_konva2 = __toESM2(require_lib());
       var CircleImage = class _CircleImage extends WorldImage7 {
         constructor(radius, outline, color) {
           super();
           this.radius = radius;
           this.outline = outline;
           this.color = color;
-          this.node = new import_konva2.default.Circle({
-            radius: radius - 1,
-            fill: outline === 0 ? this.color.toString() : void 0,
-            stroke: this.color.toString(),
-            strokeWidth: 1
-          });
         }
-        node;
+        bbox() {
+          const r = this.radius;
+          return new BBox(new Posn6(-r, -r), new Posn6(r, r));
+        }
         size() {
           return new Posn6(this.radius * 2, this.radius * 2);
         }
-        getItemsToRender(ctx, position) {
-          this.node.setPosition(position.plus(this.pinhole).toVector());
-          return this.node;
+        getReusableIds() {
+          return [`${this.radius}-${this.outline}`, `${this.radius}`, "any"];
+        }
+        createNode(ctx) {
+          const node = ctx.previousNodeCache?.getReusableNode(import_konva.default.Circle, this.getReusableIds());
+          return node || new import_konva.default.Circle({
+            strokeWidth: 1
+          });
+        }
+        render(ctx, node, position) {
+          const center = position.minus(this.pinhole);
+          node.radius(this.radius);
+          setFillAndStroke(node, this.outline, this.color);
+          node.setPosition(center.toVector());
         }
         copy() {
           return new _CircleImage(this.radius, this.outline, this.color);
         }
       };
-      var import_konva3 = __toESM2(require_lib());
-      var RectangleImage5 = class _RectangleImage extends WorldImage7 {
+      var import_konva2 = __toESM2(require_lib());
+      var RectangleImage6 = class _RectangleImage extends WorldImage7 {
         constructor(width, height, outline, color) {
           super();
           this.width = width;
           this.height = height;
           this.outline = outline;
           this.color = color;
-          this.centerOffset = new Posn6(width / 2, height / 2);
-          this.node = new import_konva3.default.Rect({
-            width: this.width - 2,
-            height: this.height - 2,
-            fill: this.outline === 0 ? this.color.toString() : void 0,
-            stroke: this.color.toString(),
-            strokeWidth: 1
-          });
         }
-        node;
-        centerOffset;
+        bbox() {
+          const c = this.size().dividedBy(2);
+          return new BBox(c.times(-1), c);
+        }
         size() {
           return new Posn6(this.width, this.height);
         }
-        getItemsToRender(ctx, position) {
-          this.node.setPosition(position.minus(this.centerOffset).plus(this.pinhole).toVector());
-          return this.node;
+        getReusableIds() {
+          return [`${this.width}-${this.height}-${this.outline}`, `${this.width}-${this.height}`, "any"];
+        }
+        createNode(ctx) {
+          const node = ctx.previousNodeCache?.getReusableNode(import_konva2.default.Rect, this.getReusableIds());
+          return node || new import_konva2.default.Rect({
+            width: this.width,
+            height: this.height,
+            strokeWidth: 1
+          });
+        }
+        render(ctx, node, position) {
+          node.width(this.width);
+          node.height(this.height);
+          setFillAndStroke(node, this.outline, this.color);
+          const topLeft = position.minus(this.size().dividedBy(2)).minus(this.pinhole).toVector();
+          node.setPosition(topLeft);
+          return node;
         }
         copy() {
           return new _RectangleImage(this.width, this.height, this.outline, this.color);
         }
       };
-      var OutlineMode5 = /* @__PURE__ */ ((OutlineMode22) => {
-        OutlineMode22[OutlineMode22["SOLID"] = 0] = "SOLID";
-        OutlineMode22[OutlineMode22["OUTLINE"] = 1] = "OUTLINE";
-        return OutlineMode22;
-      })(OutlineMode5 || {});
-      var AlignModeY2 = /* @__PURE__ */ ((AlignModeY3) => {
-        AlignModeY3[AlignModeY3["BOTTOM"] = 0] = "BOTTOM";
-        AlignModeY3[AlignModeY3["TOP"] = 1] = "TOP";
-        AlignModeY3[AlignModeY3["MIDDLE"] = 2] = "MIDDLE";
-        AlignModeY3[AlignModeY3["PINHOLE"] = 3] = "PINHOLE";
-        return AlignModeY3;
+      var import_konva3 = __toESM2(require_lib());
+      var EllipseImage = class _EllipseImage extends WorldImage7 {
+        constructor(width, height, outline, color) {
+          super();
+          this.width = width;
+          this.height = height;
+          this.outline = outline;
+          this.color = color;
+        }
+        bbox() {
+          const tl = this.pinhole.times(-1);
+          return new BBox(tl, tl.plus(this.size()));
+        }
+        size() {
+          return new Posn6(this.width, this.height);
+        }
+        getReusableIds() {
+          return [`${this.width}-${this.height}-${this.outline}`, `${this.width}-${this.height}`, "any"];
+        }
+        createNode(ctx) {
+          const node = ctx.previousNodeCache?.getReusableNode(import_konva3.default.Ellipse, this.getReusableIds());
+          return node || new import_konva3.default.Ellipse({
+            radiusX: this.width / 2,
+            radiusY: this.height / 2,
+            strokeWidth: 1
+          });
+        }
+        render(ctx, node, position) {
+          node.radiusX(this.width / 2);
+          node.radiusY(this.height / 2);
+          setFillAndStroke(node, this.outline, this.color);
+          node.setPosition(position.minus(this.pinhole).toVector());
+        }
+        copy() {
+          return new _EllipseImage(this.width, this.height, this.outline, this.color);
+        }
+      };
+      var AlignModeY2 = /* @__PURE__ */ ((AlignModeY22) => {
+        AlignModeY22[AlignModeY22["BOTTOM"] = 0] = "BOTTOM";
+        AlignModeY22[AlignModeY22["TOP"] = 1] = "TOP";
+        AlignModeY22[AlignModeY22["MIDDLE"] = 2] = "MIDDLE";
+        AlignModeY22[AlignModeY22["PINHOLE"] = 3] = "PINHOLE";
+        return AlignModeY22;
       })(AlignModeY2 || {});
-      var AlignModeX2 = /* @__PURE__ */ ((AlignModeX3) => {
-        AlignModeX3[AlignModeX3["LEFT"] = 0] = "LEFT";
-        AlignModeX3[AlignModeX3["RIGHT"] = 1] = "RIGHT";
-        AlignModeX3[AlignModeX3["CENTER"] = 2] = "CENTER";
-        AlignModeX3[AlignModeX3["PINHOLE"] = 3] = "PINHOLE";
-        return AlignModeX3;
+      var AlignModeX2 = /* @__PURE__ */ ((AlignModeX22) => {
+        AlignModeX22[AlignModeX22["LEFT"] = 0] = "LEFT";
+        AlignModeX22[AlignModeX22["RIGHT"] = 1] = "RIGHT";
+        AlignModeX22[AlignModeX22["CENTER"] = 2] = "CENTER";
+        AlignModeX22[AlignModeX22["PINHOLE"] = 3] = "PINHOLE";
+        return AlignModeX22;
       })(AlignModeX2 || {});
       var import_konva4 = __toESM2(require_lib());
       var FontStyle = /* @__PURE__ */ ((FontStyle2) => {
@@ -12094,11 +12101,11 @@
         return FontStyle2;
       })(FontStyle || {});
       var TextImage6 = class _TextImage extends WorldImage7 {
+        _size;
         text;
         color;
         fontStyle = "regular";
         fontSize = 13;
-        node;
         constructor(text, colorOrSize, colorOrFontStyle, maybeColor) {
           super();
           this.text = text;
@@ -12116,7 +12123,7 @@
           if (maybeColor instanceof Color10) {
             this.color = maybeColor;
           }
-          this.node = new import_konva4.default.Text({
+          const measure = new import_konva4.default.Text({
             x: 0,
             y: 0,
             align: "left",
@@ -12124,58 +12131,235 @@
             fontSize: this.fontSize,
             fontStyle: this.fontStyle,
             fill: this.color.toString()
-          });
+          }).measureSize(this.text);
+          this._size = new Posn6(measure.width, measure.height);
         }
         copy() {
           return new _TextImage(this.text, this.fontSize, this.fontStyle, this.color);
         }
-        size() {
-          const sz = this.node.measureSize(this.text);
-          return new Posn6(sz.width, sz.height);
+        getReusableIds() {
+          return [this.text];
         }
-        getItemsToRender(ctx, position) {
-          this.node.setPosition(position.toVector());
-          return this.node;
+        bbox() {
+          const tl = this.pinhole.times(-1);
+          return new BBox(tl, tl.plus(this.size()));
+        }
+        size() {
+          return this._size;
+        }
+        createNode(ctx) {
+          const node = ctx.previousNodeCache?.getReusableNode(import_konva4.default.Text, this.getReusableIds());
+          return node || new import_konva4.default.Text({
+            align: "left"
+          });
+        }
+        render(ctx, node, position) {
+          node.text(this.text);
+          node.fontSize(this.fontSize);
+          node.fontStyle(this.fontStyle);
+          node.fill(this.color.toString());
+          node.setPosition(position.minus(this.pinhole).toVector());
         }
       };
       var import_konva5 = __toESM2(require_lib());
-      var OverlayOffsetAlign2 = class _OverlayOffsetAlign extends WorldImage7 {
-        constructor(alignModeX, alignModeY, top, dx, dy, bottom) {
+      var OverlayOffsetAlignBase = class _OverlayOffsetAlignBase extends WorldImage7 {
+        constructor(alignX, alignY, top, dx, dy, bot) {
           super();
-          this.alignModeX = alignModeX;
-          this.alignModeY = alignModeY;
+          this.alignX = alignX;
+          this.alignY = alignY;
           this.top = top;
           this.dx = dx;
           this.dy = dy;
-          this.bottom = bottom;
+          this.bot = bot;
+          const bottomSize = bot.size();
+          const topSize = top.size();
+          const [xBotMoveDist, xTopMoveDist] = [this.xBotMoveDist(), this.xTopMoveDist()];
+          const [yBotMoveDist, yTopMoveDist] = [this.yBotMoveDist(), this.yTopMoveDist()];
+          const rightX = Math.max(bottomSize.x / 2 + xBotMoveDist, topSize.x / 2 + xTopMoveDist);
+          const leftX = Math.min(-bottomSize.x / 2 + xBotMoveDist, -topSize.x / 2 + xTopMoveDist);
+          const bottomY = Math.max(bottomSize.y / 2 + yBotMoveDist, topSize.y / 2 + yTopMoveDist);
+          const topY = Math.min(-bottomSize.y / 2 + yBotMoveDist, -topSize.y / 2 + yTopMoveDist);
+          const centerX = (rightX + leftX) / 2;
+          const centerY = (bottomY + topY) / 2;
+          const botDeltaY = -centerY + yBotMoveDist;
+          const topDeltaY = -centerY + yTopMoveDist;
+          const botDeltaX = -centerX + xBotMoveDist;
+          const topDeltaX = -centerX + xTopMoveDist;
+          this.deltaBot = new Posn6(botDeltaX, botDeltaY);
+          this.deltaTop = new Posn6(topDeltaX, topDeltaY);
+          if (alignY == 3 && alignX == 3 && dx == 0 && dy == 0) {
+            this.pinhole = new Posn6(-centerX, -centerY);
+          }
+          this.boundingBox = new BBox(new Posn6(leftX, topY), new Posn6(rightX, bottomY));
+        }
+        _size;
+        boundingBox;
+        deltaBot;
+        deltaTop;
+        yBotMoveDist() {
+          let moveDist = 0;
+          if (this.alignY != 1 && this.alignY != 0) {
+            if (this.alignY == 3) {
+              moveDist = -this.bot.pinhole.y;
+            }
+          } else {
+            const h1 = this.top.getHeight();
+            const h2 = this.bot.getHeight();
+            if (this.alignY == 1) {
+              moveDist = (h2 - h1) / 2;
+            } else if (this.alignY == 0) {
+              moveDist = (h1 - h2) / 2;
+            }
+          }
+          moveDist += this.dy;
+          return moveDist;
+        }
+        yTopMoveDist() {
+          return this.alignY == 3 ? -this.top.pinhole.y : 0;
+        }
+        xBotMoveDist() {
+          let moveDist = 0;
+          if (this.alignX != 0 && this.alignX != 1) {
+            if (this.alignX === 3) {
+              moveDist = -this.bot.pinhole.x;
+            }
+          } else {
+            const w1 = this.top.getWidth();
+            const w2 = this.bot.getWidth();
+            if (this.alignX === 0) {
+              moveDist = (w2 - w1) / 2;
+            } else if (this.alignX == 1) {
+              moveDist = (w1 - w2) / 2;
+            }
+          }
+          moveDist += this.dx;
+          return moveDist;
+        }
+        xTopMoveDist() {
+          return this.alignX == 3 ? -this.top.pinhole.x : 0;
+        }
+        bbox() {
+          return this.boundingBox;
+        }
+        getReusableIds() {
+          return [];
+        }
+        createNode(ctx) {
+          const top = this.top.createNode(ctx);
+          const bottom = this.bot.createNode(ctx);
+          ctx.nextNodeCache.addNode(this.top.getReusableIds(), top);
+          ctx.nextNodeCache.addNode(this.bot.getReusableIds(), bottom);
+          const group = new import_konva5.default.Group({});
+          group.add(bottom);
+          group.add(top);
+          return group;
+        }
+        render(ctx, node, position) {
+          const bottom = node.children[0];
+          const top = node.children[1];
+          this.top.render(ctx, top, this.deltaTop);
+          this.bot.render(ctx, bottom, this.deltaBot);
+          node.setPosition(position.minus(this.pinhole));
+        }
+        size() {
+          return this.bbox().size();
         }
         copy() {
-          return new _OverlayOffsetAlign(
-            this.alignModeX,
-            this.alignModeY,
+          return new _OverlayOffsetAlignBase(
+            this.alignX,
+            this.alignY,
             this.top,
             this.dx,
             this.dy,
-            this.bottom
+            this.bot
           );
-        }
-        size() {
-          return new Posn6(this.getWidth(), this.getHeight());
-        }
-        getWidth() {
-          return 0;
-        }
-        getHeight() {
-          return 0;
-        }
-        getItemsToRender(ctx, position) {
-          return new import_konva5.default.Group({
-            x: position.x,
-            y: position.y
-          });
         }
       };
       var import_konva6 = __toESM2(require_lib());
+      var EmptyImage = class _EmptyImage extends WorldImage7 {
+        bbox() {
+          return new BBox(Posn6.origin, Posn6.origin);
+        }
+        getReusableIds() {
+          return ["empty-node"];
+        }
+        createNode() {
+          return new import_konva6.default.Rect({
+            width: 0,
+            height: 0
+          });
+        }
+        render() {
+        }
+        copy() {
+          return new _EmptyImage();
+        }
+      };
+      var OverlayImage5 = class extends OverlayOffsetAlignBase {
+        constructor(top, bottom) {
+          super(3, 3, top, 0, 0, bottom);
+        }
+      };
+      var OverlayOffsetAlign2 = class _OverlayOffsetAlign extends OverlayOffsetAlignBase {
+        constructor(alignX, alignY, top, dx, dy, bottom) {
+          super(alignX, alignY, top, dx, dy, bottom);
+        }
+        copy() {
+          return new _OverlayOffsetAlign(
+            this.alignX,
+            this.alignY,
+            this.top,
+            this.dx,
+            this.dy,
+            this.bot
+          );
+        }
+      };
+      var BesideImage2 = class _BesideImage extends OverlayOffsetAlignBase {
+        constructor(left, right = new EmptyImage(), ...rest) {
+          const rightFolded = rest.length > 0 ? new _BesideImage(right, rest[0], ...rest.slice(1)) : right || new EmptyImage();
+          const sz1 = left.size();
+          const sz2 = rightFolded.size();
+          super(3, 3, left, sz1.x / 2 + sz2.x / 2 + 1, 0, rightFolded);
+        }
+        copy() {
+          return new _BesideImage(this.top, this.bot);
+        }
+      };
+      var AboveImage = class _AboveImage extends OverlayOffsetAlignBase {
+        constructor(top, bottom = new EmptyImage(), ...rest) {
+          const bottomFolded = rest.length > 0 ? new _AboveImage(bottom, rest[0], ...rest.slice(1)) : bottom || new EmptyImage();
+          const sz1 = top.size();
+          const sz2 = bottomFolded.size();
+          super(3, 3, top, 0, sz1.y / 2 + sz2.y / 2 + 1, bottomFolded);
+        }
+        copy() {
+          return new _AboveImage(this.top, this.bot);
+        }
+      };
+      var BesideAlignImage2 = class _BesideAlignImage extends OverlayOffsetAlignBase {
+        constructor(alignY, left, right = new EmptyImage(), ...rest) {
+          const rightFolded = rest.length > 0 ? new BesideImage2(right, rest[0], ...rest.slice(1)) : right || new EmptyImage();
+          const sz1 = left.size();
+          const sz2 = rightFolded.size();
+          super(3, alignY, left, sz1.x / 2 + sz2.x / 2 + 1, 0, rightFolded);
+        }
+        copy() {
+          return new _BesideAlignImage(this.alignY, this.top, this.bot);
+        }
+      };
+      var AboveAlignImage = class _AboveAlignImage extends OverlayOffsetAlignBase {
+        constructor(alignX, top, bottom, ...rest) {
+          const bottomFolded = rest.length > 0 ? new AboveImage(bottom, rest[0], ...rest.slice(1)) : bottom || new EmptyImage();
+          const sz1 = top.size();
+          const sz2 = bottomFolded.size();
+          super(alignX, 3, top, 0, sz1.y / 2 + sz2.y / 2 + 1, bottomFolded);
+        }
+        copy() {
+          return new _AboveAlignImage(this.alignX, this.top, this.bot);
+        }
+      };
+      var import_konva7 = __toESM2(require_lib());
       var RotateImage2 = class _RotateImage extends WorldImage7 {
         constructor(image, angle) {
           super();
@@ -12185,26 +12369,37 @@
         copy() {
           return new _RotateImage(this.image, this.angle);
         }
+        bbox() {
+          const tl = this.pinhole.times(-1);
+          return new BBox(tl, tl.plus(this.size()));
+        }
         size() {
           const imageSize = this.image.size();
-          const rect = new import_konva6.default.Rect({ x: 0, y: 0, width: imageSize.x, height: imageSize.y });
+          const rect = new import_konva7.default.Rect({ x: 0, y: 0, width: imageSize.x, height: imageSize.y });
           rect.rotate(this.angle);
           return new Posn6(rect.width(), rect.height());
         }
-        getItemsToRender(ctx, position) {
-          const image = this.image.getItemsToRender(ctx, Posn6.origin);
-          const group = new import_konva6.default.Group({});
-          group.add(image);
-          group.rotate(this.angle);
-          const width = group.width();
-          const height = group.height();
-          group.setPosition(
-            position.minus(new Posn6(width / 2, height / 2)).plus(this.pinhole).toVector()
-          );
+        getReusableIds() {
+          return [];
+        }
+        createNode(ctx) {
+          const child = this.image.createNode(ctx);
+          ctx.nextNodeCache.addNode(this.image.getReusableIds(), child);
+          const group = new import_konva7.default.Group({});
+          group.add(child);
           return group;
         }
+        render(ctx, node, position) {
+          this.image.render(ctx, node.children[0], position);
+          node.rotate(this.angle);
+          const width = node.width();
+          const height = node.height();
+          node.setPosition(
+            position.minus(new Posn6(width / 2, height / 2)).plus(this.pinhole).toVector()
+          );
+        }
       };
-      var import_konva7 = __toESM2(require_lib());
+      var import_konva8 = __toESM2(require_lib());
       var FromFileImage3 = class _FromFileImage extends WorldImage7 {
         constructor(url) {
           super();
@@ -12213,26 +12408,9 @@
           if (!image) {
             throw new Error(`Image ${url} not preloaded - you must preload it so we have dimensions`);
           }
-          this.node = new import_konva7.default.Image({
-            image,
-            width: image.width,
-            height: image.height
-          });
+          this.image = image;
         }
         static Metadata = {};
-        node;
-        copy() {
-          return new _FromFileImage(this.url);
-        }
-        size() {
-          return new Posn6(this.node.width(), this.node.height());
-        }
-        getItemsToRender(ctx, position) {
-          this.node.setPosition(
-            position.moved(-this.node.width() / 2, -this.node.height() / 2).plus(this.pinhole).toVector()
-          );
-          return this.node;
-        }
         static async preload(...images) {
           const promises = images.map((url) => {
             return new Promise((resolve) => {
@@ -12246,12 +12424,89 @@
           });
           await Promise.all(promises);
         }
+        image;
+        copy() {
+          return new _FromFileImage(this.url);
+        }
+        bbox() {
+          const tl = this.pinhole.times(-1);
+          return new BBox(tl, tl.plus(this.size()));
+        }
+        size() {
+          return new Posn6(this.image.width, this.image.height);
+        }
+        getReusableIds() {
+          return [this.url];
+        }
+        createNode() {
+          return new import_konva8.default.Image({
+            image: this.image,
+            width: this.image.width,
+            height: this.image.height
+          });
+        }
+        render(ctx, node, position) {
+          node.setPosition(
+            position.moved(-this.image.width / 2, -this.image.height / 2).minus(this.pinhole).toVector()
+          );
+        }
       };
-      var import_konva8 = __toESM2(require_lib());
+      var import_konva9 = __toESM2(require_lib());
       var WorldEnd2 = class {
         constructor(isEnd, scene) {
           this.isEnd = isEnd;
           this.scene = scene;
+        }
+      };
+      var ReusableNodeCache = class {
+        allNodes = /* @__PURE__ */ new Set();
+        cache = /* @__PURE__ */ new Map();
+        getReusableNode(type, ids) {
+          const typeCache = this.cache.get(type.name);
+          if (typeCache === void 0) {
+            return void 0;
+          }
+          for (const id of ids) {
+            if (typeCache.has(id)) {
+              const node = typeCache.get(id);
+              if (node?.length) {
+                const reused = node.shift();
+                this.allNodes.delete(reused);
+                return reused;
+              }
+            }
+          }
+          return void 0;
+        }
+        forEachNode(fn) {
+          this.allNodes.forEach((node) => {
+            fn(node);
+          });
+        }
+        clear() {
+          this.allNodes.clear();
+          this.cache.clear();
+        }
+        addNode(ids, node) {
+          this.allNodes.add(node);
+          if (!ids?.length) {
+            return;
+          }
+          let typeCache = this.cache.get(node.constructor.name);
+          if (typeCache === void 0) {
+            typeCache = /* @__PURE__ */ new Map();
+            this.cache.set(node.constructor.name, typeCache);
+          }
+          ids.forEach((id) => {
+            let newTypeCache = typeCache.get(id);
+            if (!newTypeCache) {
+              newTypeCache = [];
+              typeCache.set(id, newTypeCache);
+            }
+            if (!newTypeCache.includes(node)) {
+              newTypeCache.push(node);
+            }
+          });
         }
       };
       var WorldScene4 = class {
@@ -12261,14 +12516,35 @@
         images = [];
         placeImageXY(image, x, y) {
           this.images.push({ image, position: new Posn6(x, y) });
+          return this;
         }
-        draw(layer) {
+        draw(layer, nodeCache) {
+          const context = {
+            layer,
+            previousNodeCache: nodeCache,
+            nextNodeCache: new ReusableNodeCache()
+          };
           this.images.forEach(({ image, position }) => {
-            const item = image.getItemsToRender({ layer }, position);
-            layer.add(item);
+            const reusable = image.getReusableIds();
+            const node = image.createNode(context);
+            if (reusable?.length) {
+              context.nextNodeCache.addNode(image.getReusableIds(), node);
+            }
+            image.render(context, node, position);
+            layer.add(node);
           });
+          return context.nextNodeCache;
         }
       };
+      var KeyMap = {
+        ArrowLeft: "left",
+        ArrowRight: "right",
+        ArrowUp: "up",
+        ArrowDown: "down"
+      };
+      function mapKey(e) {
+        return KeyMap[e.key] || e.key;
+      }
       var WorldEndMarker = class {
         constructor(message) {
           this.message = message;
@@ -12280,6 +12556,7 @@
         size = new Posn6(1e3, 1e3);
         isEndOfWorld = false;
         tickTimer;
+        renderedNodes;
         /**
          * Modify your game state to reflect the passage of time
          */
@@ -12302,19 +12579,20 @@
          * Called if one of the other methods returns endOfWorld
          */
         lastScene;
+        htmlContainerId = "world";
         getEmptyScene() {
           return new WorldScene4(this.size);
         }
         bigBang(width, height, speed = 0) {
-          this.stage = new import_konva8.default.Stage({
-            container: "world",
+          this.stage = new import_konva9.default.Stage({
+            container: this.htmlContainerId,
             width,
             height
           });
-          document.getElementById("world")?.addEventListener("keydown", (e) => {
-            this.onKeyEvent(e.key);
+          window.addEventListener("keydown", (e) => {
+            this.onKeyEvent(mapKey(e));
           });
-          this.layer = new import_konva8.default.Layer();
+          this.layer = new import_konva9.default.Layer();
           this.stage.on("click", (e) => {
             const position = this.stage?.getPointerPosition();
             if (position) {
@@ -12331,7 +12609,6 @@
           if (!this.layer) {
             throw new Error("Layer not initialized");
           }
-          this.layer.removeChildren();
           const result = this.onTick();
           if (result instanceof WorldEndMarker) {
             this.endTheWorld();
@@ -12341,14 +12618,18 @@
           if (!scene) {
             throw new Error("makeScene did not return a scene");
           }
-          scene.draw(this.layer);
+          const currentNodeCache = this.renderedNodes;
+          this.renderedNodes = scene.draw(this.layer, this.renderedNodes);
+          currentNodeCache?.forEachNode((node) => {
+            node.destroy();
+          });
+          currentNodeCache?.clear();
         }
         endTheWorld() {
           if (this.tickTimer) {
             console.log("The world has ended");
             clearInterval(this.tickTimer);
             this.tickTimer = void 0;
-            this.stage?.removeChildren();
           }
         }
         /**
@@ -12368,6 +12649,34 @@
           return new WorldEndMarker(message);
         }
       };
+      function oneShotWorld({
+        htmlContainerId,
+        getImage,
+        width,
+        height
+      }) {
+        class OneShotWorld extends World2 {
+          constructor() {
+            super();
+            if (htmlContainerId) {
+              this.htmlContainerId = htmlContainerId;
+            }
+          }
+          makeScene() {
+            const image = getImage();
+            const scene = this.getEmptyScene();
+            scene.placeImageXY(image, 0, 0);
+            return scene;
+          }
+        }
+        const world = new OneShotWorld();
+        const element = document.getElementById(world.htmlContainerId);
+        if (element && width && height) {
+          element.style.height = `${height}px`;
+          element.style.width = `${width}px`;
+        }
+        world.bigBang(width || element?.clientWidth || 500, height || element?.clientHeight || 500);
+      }
     }
   });
 
@@ -13859,15 +14168,18 @@
         case 2 /* I */:
           return this.t.i;
         case 6 /* J */:
-          return this.t.j;
+          return this.t.j.copy();
         case 5 /* L */:
           return this.t.l;
         case 4 /* T */:
           return this.t.t;
         case 7 /* CHEESE */:
           return this.t.cheese;
-        default:
+        case 8 /* EMPTY */:
+        case 9 /* FLOOR */:
           return this.t.empty;
+        default:
+          throw new Error(`Unknown residue ${r}`);
       }
     }
     pieceToImage(a) {
@@ -14001,11 +14313,18 @@
       let systime = Date.now();
       let time = systime - this.stats.starttime;
       let s = new import_impworld11.WorldScene(new import_impworld11.Posn(width, height));
-      let singerpos = new import_impworld11.Posn(_GameState.SCREEN_WIDTH - Math.floor(this.bot.getSinger().getWidth() / 2), _GameState.SCREEN_HEIGHT - Math.floor(this.bot.getSinger().getWidth() / 2));
+      let singerpos = new import_impworld11.Posn(
+        _GameState.SCREEN_WIDTH - Math.floor(this.bot.getSinger().getWidth() / 2),
+        _GameState.SCREEN_HEIGHT - Math.floor(this.bot.getSinger().getWidth() / 2)
+      );
       if (time == 0) {
         time += 1;
       }
-      s.placeImageXY(this.board.bgimage, Math.round(_GameState.SCREEN_WIDTH / 2), Math.round(_GameState.SCREEN_HEIGHT / 2));
+      s.placeImageXY(
+        this.board.bgimage,
+        Math.round(_GameState.SCREEN_WIDTH / 2),
+        Math.round(_GameState.SCREEN_HEIGHT / 2)
+      );
       const linemeter = new import_impworld11.TextImage("LINES:  " + this.stats.lines, import_impworld11.Color.WHITE);
       const atkmeter = new AtkMeter(this.stats.atk, time).getMeterVal();
       const timemeter = new TimeMeter(time).getMeterVal();
@@ -14022,21 +14341,39 @@
           i * CELL_SIZE + CELL_SIZE / 2
         );
       }
-      s.placeImageXY(this.board.garbage.draw(this.board.height), this.board.width * CELL_SIZE + CELL_SIZE / 2, this.board.height / 2 * CELL_SIZE);
+      s.placeImageXY(
+        this.board.garbage.draw(this.board.height),
+        this.board.width * CELL_SIZE + CELL_SIZE / 2,
+        this.board.height / 2 * CELL_SIZE
+      );
       const shadow = this.board.fallingpiece;
-      const storedpos = new import_impworld11.Posn(this.board.fallingpiece.position.x, this.board.fallingpiece.position.y);
+      const storedpos = new import_impworld11.Posn(
+        this.board.fallingpiece.position.x,
+        this.board.fallingpiece.position.y
+      );
       for (let i = shadow.position.y; i < this.board.height - 1; i++) {
-        if (this.board.fallingpiece.checkOverlap(this.board, this.board.fallingpiece.piece.first, new import_impworld11.Posn(0, i - shadow.position.y + 1))) {
+        if (this.board.fallingpiece.checkOverlap(
+          this.board,
+          this.board.fallingpiece.piece.first,
+          new import_impworld11.Posn(0, i - shadow.position.y + 1)
+        )) {
           shadow.position = new import_impworld11.Posn(shadow.position.x, i);
           break;
         }
       }
       if (shadow.position == storedpos) {
-        shadow.position = new import_impworld11.Posn(shadow.position.x, this.board.height - shadow.getEmptyLineCountY());
+        shadow.position = new import_impworld11.Posn(
+          shadow.position.x,
+          this.board.height - shadow.getEmptyLineCountY()
+        );
       }
       shadow.drawPiece(this.board.t, s, this.board.t.shadow);
       shadow.position = storedpos;
-      this.board.fallingpiece.drawPiece(this.board.t, s, this.board.pieceToImage(this.board.fallingpiece));
+      this.board.fallingpiece.drawPiece(
+        this.board.t,
+        s,
+        this.board.pieceToImage(this.board.fallingpiece)
+      );
       s.placeImageXY(
         this.board.t.holdbox,
         Math.floor(width + this.board.t.holdbox.getWidth() / 2 + CELL_SIZE),
@@ -14050,12 +14387,39 @@
         );
         p.drawPiece(this.board.t, s, this.board.pieceToImage(p));
       }
-      s.placeImageXY(new import_impworld11.TextImage("LINES:  " + this.stats.lines, import_impworld11.Color.WHITE).movePinhole(linemeter.getWidth() * -1 / 2, 0), width + CELL_SIZE, _GameState.FIRST_METER_SPACING);
-      s.placeImageXY(atkmeter.movePinhole(atkmeter.getWidth() * -1 / 2, 0), width + CELL_SIZE, Math.floor(_GameState.METER_SPACING * 2.5));
-      s.placeImageXY(timemeter.movePinhole(timemeter.getWidth() * -1 / 2, 0), width + CELL_SIZE, _GameState.METER_SPACING * 3);
-      s.placeImageXY(piecemeter.movePinhole(piecemeter.getWidth() * -1 / 2, 0), width + CELL_SIZE, Math.floor(_GameState.METER_SPACING * 3.5));
-      s.placeImageXY(b2bmeter.movePinhole(b2bmeter.getWidth() * -1 / 2, 0), width + CELL_SIZE, _GameState.METER_SPACING * 4);
-      s.placeImageXY(combometer.movePinhole(combometer.getWidth() * -1 / 2, 0), width + CELL_SIZE, _GameState.METER_SPACING * 5);
+      s.placeImageXY(
+        new import_impworld11.TextImage("LINES:  " + this.stats.lines, import_impworld11.Color.WHITE).movePinhole(
+          linemeter.getWidth() * -1 / 2,
+          0
+        ),
+        width + CELL_SIZE,
+        _GameState.FIRST_METER_SPACING
+      );
+      s.placeImageXY(
+        atkmeter.movePinhole(atkmeter.getWidth() * -1 / 2, 0),
+        width + CELL_SIZE,
+        Math.floor(_GameState.METER_SPACING * 2.5)
+      );
+      s.placeImageXY(
+        timemeter.movePinhole(timemeter.getWidth() * -1 / 2, 0),
+        width + CELL_SIZE,
+        _GameState.METER_SPACING * 3
+      );
+      s.placeImageXY(
+        piecemeter.movePinhole(piecemeter.getWidth() * -1 / 2, 0),
+        width + CELL_SIZE,
+        Math.floor(_GameState.METER_SPACING * 3.5)
+      );
+      s.placeImageXY(
+        b2bmeter.movePinhole(b2bmeter.getWidth() * -1 / 2, 0),
+        width + CELL_SIZE,
+        _GameState.METER_SPACING * 4
+      );
+      s.placeImageXY(
+        combometer.movePinhole(combometer.getWidth() * -1 / 2, 0),
+        width + CELL_SIZE,
+        _GameState.METER_SPACING * 5
+      );
       for (let i = 0; i < 5; i++) {
         const queuepiece = this.board.tetriminoToPiece(this.board.queue[i]);
         queuepiece.position = new import_impworld11.Posn(width / CELL_SIZE + 4, (i + 2) * 4);
@@ -14072,6 +14436,89 @@
       }
       s.placeImageXY(songname.movePinhole(0, -songname.getHeight() / 2), width / 2, height);
       return s;
+    }
+    onKeyEvent(key) {
+      switch (key) {
+        case "left":
+          this.board.fallingpiece.moveLeft(this.board);
+          this.leftkeypressed = true;
+          break;
+        case "right":
+          this.board.fallingpiece.moveRight(this.board);
+          this.rightkeypressed = true;
+          break;
+        case "down":
+          this.sdfactive = true;
+          break;
+        case " ":
+          this.board.fallingpiece.hardDrop(this.board);
+          this.stats.pieces += 1;
+          const tosend = this.board.removeRows(this);
+          this.stats.atk += tosend;
+          this.spin = this.board.fallingpiece.hasSpun(this.board);
+          break;
+        case "c":
+          this.board.holdPiece();
+          break;
+        case "up":
+          const testsright = this.board.fallingpiece.getKickTests(0 /* CLOCKWISE */);
+          let moved = false;
+          for (let i = 0; i < testsright.length; i++) {
+            const p = testsright[i];
+            if (!this.board.fallingpiece.checkOverlap(
+              this.board,
+              this.board.fallingpiece.piece.right,
+              p
+            ) && !moved) {
+              this.board.fallingpiece.position = new import_impworld11.Posn(
+                this.board.fallingpiece.position.x + p.x,
+                this.board.fallingpiece.position.y + p.y
+              );
+              this.board.fallingpiece.rotate(0 /* CLOCKWISE */);
+              this.spin = this.board.fallingpiece.hasSpun(this.board);
+              this.board.spin = this.spin;
+              moved = true;
+            }
+          }
+          this.spin = this.board.fallingpiece.hasSpun(this.board);
+          break;
+        case "z":
+          const testsleft = this.board.fallingpiece.getKickTests(1 /* COUNTERCLOCKWISE */);
+          let movedpiece = false;
+          for (let i = 0; i < testsleft.length; i++) {
+            const p = testsleft[i];
+            if (!this.board.fallingpiece.checkOverlap(
+              this.board,
+              this.board.fallingpiece.piece.left,
+              p
+            ) && !movedpiece) {
+              this.board.fallingpiece.position = new import_impworld11.Posn(
+                this.board.fallingpiece.position.x + p.x,
+                this.board.fallingpiece.position.y + p.y
+              );
+              this.board.fallingpiece.rotate(1 /* COUNTERCLOCKWISE */);
+              this.spin = this.board.fallingpiece.hasSpun(this.board);
+              this.board.spin = this.spin;
+              movedpiece = true;
+            }
+          }
+          this.spin = this.board.fallingpiece.hasSpun(this.board);
+          break;
+        case "a":
+          if (!this.board.fallingpiece.checkOverlap(
+            this.board,
+            this.board.fallingpiece.piece.flip,
+            new import_impworld11.Posn(0, 0)
+          )) {
+            this.board.fallingpiece.rotate(2 /* FLIP */);
+          }
+          this.spin = this.board.fallingpiece.hasSpun(this.board);
+          this.board.spin = this.spin;
+          break;
+        case "r":
+          this.board = new Board();
+          this.stats = new GameStats();
+      }
     }
   };
 
