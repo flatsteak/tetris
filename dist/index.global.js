@@ -13046,7 +13046,6 @@
       }
     }
   };
-  var CELL_SIZE = 20;
 
   // src/ui/AudioPlayer.ts
   var audioCache = /* @__PURE__ */ new Map();
@@ -13233,13 +13232,13 @@
       }
     }
     softDropInf(b) {
-      for (let i = this.position.y; i < b.height; i++) {
+      for (let i = this.position.y; i < b.positions.boardRows; i++) {
         if (this.checkOverlap(b, this.piece.first, new import_impworld4.Posn(0, i - this.position.y + 1))) {
           this.position = new import_impworld4.Posn(this.position.x, i);
           return;
         }
       }
-      this.position = new import_impworld4.Posn(this.position.x, b.height - this.getEmptyLineCountY());
+      this.position = new import_impworld4.Posn(this.position.x, b.positions.boardRows - this.getEmptyLineCountY());
     }
     moveLeftInf(b) {
       for (let i = 1; i < this.position.x + 4; i++) {
@@ -13251,23 +13250,23 @@
       this.position = new import_impworld4.Posn(-this.getEmptyLineCountFromLeft(), this.position.y);
     }
     moveRightInf(b) {
-      for (let i = this.position.x; i < b.width; i++) {
+      for (let i = this.position.x; i < b.positions.boardColumns; i++) {
         if (this.checkOverlap(b, this.piece.first, new import_impworld4.Posn(i - this.position.x + 1, 0))) {
           this.position = new import_impworld4.Posn(i, this.position.y);
           return;
         }
       }
-      this.position = new import_impworld4.Posn(b.width - this.getEmptyLineCountFromRight(), this.position.y);
+      this.position = new import_impworld4.Posn(b.positions.boardColumns - this.getEmptyLineCountFromRight(), this.position.y);
     }
     hardDrop(b) {
-      for (let i = this.position.y; i < b.height; i++) {
+      for (let i = this.position.y; i < b.positions.boardRows; i++) {
         if (this.checkOverlap(b, this.piece.first, new import_impworld4.Posn(0, i - this.position.y + 1))) {
           this.position = new import_impworld4.Posn(this.position.x, i);
           b.placePiece(this);
           return;
         }
       }
-      this.position = new import_impworld4.Posn(this.position.x, b.height - this.getEmptyLineCountY());
+      this.position = new import_impworld4.Posn(this.position.x, b.positions.boardRows - this.getEmptyLineCountY());
       b.placePiece(this);
       b.pieceplaced = true;
     }
@@ -13341,14 +13340,14 @@
         }
       }
     }
-    drawPiece(t, s, cell) {
+    drawPiece(t, s, cell, position) {
       for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 4; j++) {
           if (this.piece.first[i][j]) {
             s.placeImageXY(
               cell,
-              (j + this.position.x) * CELL_SIZE + CELL_SIZE / 2,
-              (i + this.position.y) * CELL_SIZE + CELL_SIZE / 2
+              position.boardLeft + (j + this.position.x) * position.cellSize + position.cellSize / 2,
+              position.boardTop + (i + this.position.y) * position.cellSize + position.cellSize / 2
             );
           }
         }
@@ -13893,153 +13892,123 @@
   // src/themes/ThemePool.ts
   var import_impworld8 = __toESM(require_dist());
   var ThemePool = class {
-    static DEFAULT_THEME = new Theme(
+    static DEFAULT_THEME = (p) => new Theme(
       new import_impworld8.RectangleImage(
-        CELL_SIZE,
-        CELL_SIZE,
+        p.cellSize,
+        p.cellSize,
         import_impworld8.OutlineMode.SOLID,
         import_impworld8.Color.BLUE.brighter().brighter()
       ),
       // i
-      new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.GREEN),
+      new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.GREEN),
       // s
-      new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.RED),
+      new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.RED),
       // z
-      new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLUE),
+      new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLUE),
       // j
-      new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.ORANGE),
+      new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.ORANGE),
       // l
-      new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.YELLOW),
+      new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.YELLOW),
       // o
-      new import_impworld8.RectangleImage(
-        CELL_SIZE,
-        CELL_SIZE,
-        import_impworld8.OutlineMode.SOLID,
-        new import_impworld8.Color(138, 43, 226)
-      ),
+      new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, new import_impworld8.Color(138, 43, 226)),
       // t
-      new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.LIGHT_GRAY),
+      new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.LIGHT_GRAY),
       // cheese
       new import_impworld8.OverlayImage(
         // empty
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
       ),
       new import_impworld8.OverlayImage(
-        new import_impworld8.RectangleImage(
-          CELL_SIZE * 4,
-          CELL_SIZE * 3,
-          import_impworld8.OutlineMode.OUTLINE,
-          import_impworld8.Color.WHITE
-        ),
-        new import_impworld8.RectangleImage(CELL_SIZE * 5, CELL_SIZE * 3.5, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
+        new import_impworld8.RectangleImage(p.cellSize * 4, p.cellSize * 3, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
+        new import_impworld8.RectangleImage(p.cellSize * 5, p.cellSize * 3.5, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
       ),
       new import_impworld8.OverlayImage(
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.GRAY)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.GRAY)
       )
     );
-    static OUTLINE_THEME = new Theme(
+    static OUTLINE_THEME = (p) => new Theme(
       new import_impworld8.OverlayImage(
         // i
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
         new import_impworld8.RectangleImage(
-          CELL_SIZE,
-          CELL_SIZE,
+          p.cellSize,
+          p.cellSize,
           import_impworld8.OutlineMode.SOLID,
           import_impworld8.Color.BLUE.brighter().brighter()
         )
       ),
       new import_impworld8.OverlayImage(
         // s
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.GREEN)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.GREEN)
       ),
       new import_impworld8.OverlayImage(
         // z
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.RED)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.RED)
       ),
       new import_impworld8.OverlayImage(
         // j
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLUE)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLUE)
       ),
       new import_impworld8.OverlayImage(
         // l
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.ORANGE)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.ORANGE)
       ),
       new import_impworld8.OverlayImage(
         // o
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.YELLOW)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.YELLOW)
       ),
       new import_impworld8.OverlayImage(
         // t
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
-        new import_impworld8.RectangleImage(
-          CELL_SIZE,
-          CELL_SIZE,
-          import_impworld8.OutlineMode.SOLID,
-          new import_impworld8.Color(138, 43, 226)
-        )
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, new import_impworld8.Color(138, 43, 226))
       ),
       new import_impworld8.OverlayImage(
         // cheese
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.LIGHT_GRAY)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.BLACK),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.LIGHT_GRAY)
       ),
       new import_impworld8.OverlayImage(
         // empty
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
       ),
       new import_impworld8.OverlayImage(
-        new import_impworld8.RectangleImage(
-          CELL_SIZE * 5,
-          CELL_SIZE * 3.5,
-          import_impworld8.OutlineMode.OUTLINE,
-          import_impworld8.Color.WHITE
-        ),
-        new import_impworld8.RectangleImage(CELL_SIZE * 4, CELL_SIZE * 3, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
+        new import_impworld8.RectangleImage(p.cellSize * 5, p.cellSize * 3.5, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
+        new import_impworld8.RectangleImage(p.cellSize * 4, p.cellSize * 3, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
       ),
       new import_impworld8.OverlayImage(
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.GRAY)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.GRAY)
       )
     );
-    static FADE_THEME = new Theme(
-      outlineFadeToBlack(Theme.SKYBLUE, CELL_SIZE),
-      outlineFadeToBlack(import_impworld8.Color.GREEN, CELL_SIZE),
-      outlineFadeToBlack(import_impworld8.Color.RED, CELL_SIZE),
-      outlineFadeToBlack(import_impworld8.Color.BLUE, CELL_SIZE),
-      outlineFadeToBlack(import_impworld8.Color.ORANGE, CELL_SIZE),
-      outlineFadeToBlack(import_impworld8.Color.YELLOW, CELL_SIZE),
-      outlineFadeToBlack(Theme.PURPLE, CELL_SIZE),
-      outlineFadeToBlack(import_impworld8.Color.GRAY, CELL_SIZE),
+    static FADE_THEME = (p) => new Theme(
+      outlineFadeToBlack(Theme.SKYBLUE, p.cellSize),
+      outlineFadeToBlack(import_impworld8.Color.GREEN, p.cellSize),
+      outlineFadeToBlack(import_impworld8.Color.RED, p.cellSize),
+      outlineFadeToBlack(import_impworld8.Color.BLUE, p.cellSize),
+      outlineFadeToBlack(import_impworld8.Color.ORANGE, p.cellSize),
+      outlineFadeToBlack(import_impworld8.Color.YELLOW, p.cellSize),
+      outlineFadeToBlack(Theme.PURPLE, p.cellSize),
+      outlineFadeToBlack(import_impworld8.Color.GRAY, p.cellSize),
       new import_impworld8.OverlayImage(
         // empty
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
-        new import_impworld8.RectangleImage(
-          CELL_SIZE,
-          CELL_SIZE,
-          import_impworld8.OutlineMode.SOLID,
-          new import_impworld8.Color(0, 0, 0, 200)
-        )
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, new import_impworld8.Color(0, 0, 0, 200))
       ),
       new import_impworld8.OverlayImage(
-        new import_impworld8.RectangleImage(
-          CELL_SIZE * 5,
-          CELL_SIZE * 3.5,
-          import_impworld8.OutlineMode.OUTLINE,
-          import_impworld8.Color.WHITE
-        ),
-        new import_impworld8.RectangleImage(CELL_SIZE * 4, CELL_SIZE * 3, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
+        new import_impworld8.RectangleImage(p.cellSize * 5, p.cellSize * 3.5, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
+        new import_impworld8.RectangleImage(p.cellSize * 4, p.cellSize * 3, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.BLACK)
       ),
       new import_impworld8.OverlayImage(
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
-        new import_impworld8.RectangleImage(CELL_SIZE, CELL_SIZE, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.GRAY)
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.OUTLINE, import_impworld8.Color.WHITE),
+        new import_impworld8.RectangleImage(p.cellSize, p.cellSize, import_impworld8.OutlineMode.SOLID, import_impworld8.Color.GRAY)
       )
     );
   };
@@ -14047,17 +14016,18 @@
   // src/ui/GarbageMeter.ts
   var import_impworld9 = __toESM(require_dist());
   var GarbageMeter = class {
+    // max amt accepted garbage.
+    // ex: if 20 lines are queued but maxaccept is 8, 8 lines of cheese will be added to the board per non line clear piece placed
+    constructor(pos, g = 0, max = 8) {
+      this.pos = pos;
+      this.garbage = g;
+      this.maxaccept = max;
+    }
     garbage;
     // in lines
     // describes cheese in queue about to be sent.
     // ex: 2 lines of garbage in queue, meaning 2 will be accepted / cancelled at some point
     maxaccept;
-    // max amt accepted garbage.
-    // ex: if 20 lines are queued but maxaccept is 8, 8 lines of cheese will be added to the board per non line clear piece placed
-    constructor(g = 0, max = 8) {
-      this.garbage = g;
-      this.maxaccept = max;
-    }
     receive(b) {
       const toReceive = Math.min(this.maxaccept, Math.max(0, this.garbage));
       b.addCheese(toReceive);
@@ -14065,17 +14035,27 @@
     }
     draw(height) {
       const meter = new import_impworld9.OverlayImage(
-        new import_impworld9.RectangleImage(CELL_SIZE, CELL_SIZE * height, import_impworld9.OutlineMode.OUTLINE, import_impworld9.Color.WHITE),
-        new import_impworld9.RectangleImage(CELL_SIZE, CELL_SIZE * height, import_impworld9.OutlineMode.SOLID, import_impworld9.Color.BLACK)
+        new import_impworld9.RectangleImage(
+          this.pos.cellSize,
+          this.pos.cellSize * height,
+          import_impworld9.OutlineMode.OUTLINE,
+          import_impworld9.Color.WHITE
+        ),
+        new import_impworld9.RectangleImage(
+          this.pos.cellSize,
+          this.pos.cellSize * height,
+          import_impworld9.OutlineMode.SOLID,
+          import_impworld9.Color.BLACK
+        )
       );
       const garbagedisplay = this.garbage > 0 ? new import_impworld9.RectangleImage(
-        CELL_SIZE,
-        Math.min(CELL_SIZE * 20, CELL_SIZE * this.garbage),
+        this.pos.cellSize,
+        Math.min(this.pos.cellSize * 20, this.pos.cellSize * this.garbage),
         import_impworld9.OutlineMode.SOLID,
         import_impworld9.Color.RED
       ) : new import_impworld9.RectangleImage(
-        CELL_SIZE,
-        Math.min(CELL_SIZE * 20, CELL_SIZE * -this.garbage),
+        this.pos.cellSize,
+        Math.min(this.pos.cellSize * 20, this.pos.cellSize * -this.garbage),
         import_impworld9.OutlineMode.SOLID,
         Theme.SKYBLUE
       );
@@ -14088,8 +14068,8 @@
         meter
       );
       const maxbar = new import_impworld9.RectangleImage(
-        CELL_SIZE,
-        CELL_SIZE * this.maxaccept,
+        this.pos.cellSize,
+        this.pos.cellSize * this.maxaccept,
         import_impworld9.OutlineMode.OUTLINE,
         import_impworld9.Color.WHITE
       );
@@ -14158,12 +14138,31 @@
   // src/board/Board.ts
   var import_impworld10 = __toESM(require_dist());
   var Board = class {
-    height;
-    width;
+    constructor(positions) {
+      this.positions = positions;
+      this.residue = [];
+      for (let i = 0; i < this.positions.boardRows; i++) {
+        this.residue.push(this.newEmptyRow());
+      }
+      this.currentcombo = 0;
+      this.b2b = 0;
+      this.theme = ThemePool.FADE_THEME(positions);
+      this.queue = Queue.sevenBag();
+      this.queue.push(...Queue.sevenBag());
+      this.fallingpiece = this.pullFromBag(this.queue);
+      this.hold = void 0;
+      this.pieceplaced = false;
+      this.garbage = new GarbageMeter(positions);
+      this.ornaments = [];
+      this.anims = [];
+      this.bgimage = new import_impworld10.FromFileImage(FilePaths.image.bg.BGSTARRY);
+      this.spin = false;
+      this.gameovertrigger = false;
+    }
     residue;
     currentcombo;
     b2b;
-    t;
+    theme;
     queue;
     fallingpiece;
     hold;
@@ -14174,28 +14173,6 @@
     bgimage;
     spin;
     gameovertrigger;
-    constructor() {
-      this.height = 20;
-      this.width = 10;
-      this.residue = [];
-      for (let i = 0; i < this.height; i++) {
-        this.residue.push(this.newEmptyRow());
-      }
-      this.currentcombo = 0;
-      this.b2b = 0;
-      this.t = ThemePool.FADE_THEME;
-      this.queue = Queue.sevenBag();
-      this.queue.push(...Queue.sevenBag());
-      this.fallingpiece = this.pullFromBag(this.queue);
-      this.hold = void 0;
-      this.pieceplaced = false;
-      this.garbage = new GarbageMeter();
-      this.ornaments = [];
-      this.anims = [];
-      this.bgimage = new import_impworld10.FromFileImage(FilePaths.image.bg.BGSTARRY);
-      this.spin = false;
-      this.gameovertrigger = false;
-    }
     //
     // CHEESE STUFF
     //
@@ -14212,7 +14189,7 @@
       return toreturn;
     }
     addCheese(lines) {
-      const well = Math.floor(Math.random() * this.width);
+      const well = Math.floor(Math.random() * this.positions.boardColumns);
       const cheeseline = this.newLineOfCheese(well);
       for (let i = 0; i < lines; i++) {
         this.residue.shift();
@@ -14242,7 +14219,7 @@
       this.fallingpiece = this.pullFromBag(this.queue);
     }
     overlap(p) {
-      if (p.x >= this.width || p.x < 0) {
+      if (p.x >= this.positions.boardColumns || p.x < 0) {
         return true;
       }
       switch (this.getResidueAt(p)) {
@@ -14271,12 +14248,12 @@
       }
     }
     newEmptyRow() {
-      return new Array(this.width).fill(8 /* EMPTY */);
+      return new Array(this.positions.boardColumns).fill(8 /* EMPTY */);
     }
     removeRows(g) {
       console.log(this.currentcombo);
       let toremove = [];
-      for (let i = 0; i < this.height; i++) {
+      for (let i = 0; i < this.positions.boardRows; i++) {
         let row = this.residue[i];
         if (!row.includes(8 /* EMPTY */)) {
           toremove.push(i);
@@ -14304,7 +14281,7 @@
       if (addb2b) {
         this.b2b += 1;
       }
-      let placeat = new import_impworld10.Posn(this.width / 2 * CELL_SIZE, toremove[0] * CELL_SIZE);
+      let placeat = new import_impworld10.Posn(this.positions.boardColumns / 2 * this.positions.cellSize, toremove[0] * this.positions.cellSize);
       let displayatk = atk;
       if (atk !== 0) {
         if (Date.now() - g.stats.decostarttime < GameState.DECO_DURATION && this.ornaments.length > 0) {
@@ -14359,13 +14336,13 @@
       g.stats.lines += 1;
     }
     getResidueAt(p) {
-      if (p.y >= this.height || p.x < 0) {
+      if (p.y >= this.positions.boardRows || p.x < 0) {
         return 9 /* FLOOR */;
       }
       if (p.y >= this.residue.length || p.y < 0) {
         return 8 /* EMPTY */;
       }
-      if (p.x >= this.width) {
+      if (p.x >= this.positions.boardColumns) {
         return 8 /* EMPTY */;
       }
       return this.residue[p.y][p.x];
@@ -14373,51 +14350,51 @@
     drawResidue(r) {
       switch (r) {
         case 0 /* S */:
-          return this.t.s;
+          return this.theme.s;
         case 1 /* Z */:
-          return this.t.z;
+          return this.theme.z;
         case 3 /* O */:
-          return this.t.o;
+          return this.theme.o;
         case 2 /* I */:
-          return this.t.i;
+          return this.theme.i;
         case 6 /* J */:
-          return this.t.j;
+          return this.theme.j;
         case 5 /* L */:
-          return this.t.l;
+          return this.theme.l;
         case 4 /* T */:
-          return this.t.t;
+          return this.theme.t;
         case 7 /* CHEESE */:
-          return this.t.cheese;
+          return this.theme.cheese;
         case 8 /* EMPTY */:
         case 9 /* FLOOR */:
-          return this.t.empty;
+          return this.theme.empty;
         default:
           throw new Error(`Unknown residue ${r}`);
       }
     }
     pieceToImage(a) {
       if (a instanceof SPiece) {
-        return this.t.s;
+        return this.theme.s;
       }
       if (a instanceof ZPiece) {
-        return this.t.z;
+        return this.theme.z;
       }
       if (a instanceof OPiece) {
-        return this.t.o;
+        return this.theme.o;
       }
       if (a instanceof IPiece) {
-        return this.t.i;
+        return this.theme.i;
       }
       if (a instanceof JPiece) {
-        return this.t.j;
+        return this.theme.j;
       }
       if (a instanceof LPiece) {
-        return this.t.l;
+        return this.theme.l;
       }
       if (a instanceof TPiece) {
-        return this.t.t;
+        return this.theme.t;
       }
-      return this.t.empty;
+      return this.theme.empty;
     }
     pullFromBag(queue) {
       const piece = queue.shift();
@@ -14425,7 +14402,7 @@
       return this.tetriminoToPiece(piece);
     }
     tetriminoToPiece(pull) {
-      const spawn = new import_impworld10.Posn(this.width / 2 - 2, 0);
+      const spawn = new import_impworld10.Posn(this.positions.boardColumns / 2 - 2, 0);
       switch (pull) {
         case 0 /* S */:
           const spiece = new SPiece(spawn);
@@ -14483,8 +14460,46 @@
 
   // src/GameState.ts
   var import_impworld11 = __toESM(require_dist());
+
+  // src/GamePositions.ts
+  var GamePositions = class {
+    constructor(width, height) {
+      this.width = width;
+      this.height = height;
+    }
+    get boardColumns() {
+      return 10;
+    }
+    get boardRows() {
+      return 20;
+    }
+    get cellSize() {
+      return 30;
+    }
+    get meterSpacing() {
+      return this.cellSize * 2;
+    }
+    get firstMeterSpacing() {
+      return this.cellSize * 4;
+    }
+    get boardLeft() {
+      return this.width / 2 - this.cellSize * this.boardColumns / 2;
+    }
+    get boardRight() {
+      return this.width / 2 + this.cellSize * (this.boardColumns + 1) / 2;
+    }
+    get boardTop() {
+      return 50;
+    }
+    get boardBottom() {
+      return this.boardTop + this.cellSize * (this.boardRows + 1);
+    }
+  };
+
+  // src/GameState.ts
   var GameState = class _GameState extends import_impworld11.World {
-    board = new Board();
+    board;
+    positions;
     rules = new Ruleset(3 /* VS */, 100);
     stats = new GameStats();
     keyheldtime;
@@ -14503,15 +14518,13 @@
     // in ms
     static SDF = 0;
     // in ms
-    static METER_SPACING = CELL_SIZE * 2;
-    static FIRST_METER_SPACING = CELL_SIZE * 4;
     static GAME_SPEED = 0.1;
     static INVERT_SPEED = Math.floor(1 / _GameState.GAME_SPEED);
     static DECO_DURATION = 2e3;
-    static SCREEN_WIDTH = document.getElementById("world")?.clientWidth ?? 500;
-    static SCREEN_HEIGHT = document.getElementById("world")?.clientHeight ?? 500;
-    constructor() {
+    constructor(width, height) {
       super();
+      this.positions = new GamePositions(width, height);
+      this.board = new Board(this.positions);
     }
     worldEnds() {
       if (this.rules.gameOver(this) || this.board.gameovertrigger) {
@@ -14521,23 +14534,16 @@
       }
     }
     makeScene() {
-      let width = CELL_SIZE * this.board.width;
-      let height = CELL_SIZE * this.board.height;
       let systime = Date.now();
       let time = systime - this.stats.starttime;
-      let s = new import_impworld11.WorldScene(new import_impworld11.Posn(width, height));
+      let s = this.getEmptyScene();
       let singerpos = new import_impworld11.Posn(
-        _GameState.SCREEN_WIDTH - Math.floor(this.bot.getSinger().getWidth() / 2),
-        _GameState.SCREEN_HEIGHT - Math.floor(this.bot.getSinger().getWidth() / 2)
+        this.positions.width - Math.floor(this.bot.getSinger().getWidth() / 2),
+        this.positions.height - Math.floor(this.bot.getSinger().getWidth() / 2)
       );
       if (time == 0) {
         time += 1;
       }
-      s.placeImageXY(
-        this.board.bgimage,
-        Math.round(this.board.bgimage.getWidth() / 2),
-        Math.round(this.board.bgimage.getHeight() / 2)
-      );
       const linemeter = new import_impworld11.TextImage("LINES:  " + this.stats.lines, import_impworld11.Color.WHITE);
       const atkmeter = new AtkMeter(this.stats.atk, time).getMeterVal();
       const timemeter = new TimeMeter(time).getMeterVal();
@@ -14548,72 +14554,96 @@
       this.board.residue.forEach((row, y) => {
         row.forEach((cell, x) => {
           s.placeImageXY(
-            this.board.drawResidue(cell).movePinhole(-CELL_SIZE / 2, -CELL_SIZE / 2),
-            x * CELL_SIZE,
-            y * CELL_SIZE
+            this.board.drawResidue(cell).movePinhole(-this.positions.cellSize / 2, -this.positions.cellSize / 2),
+            this.positions.boardLeft + x * this.positions.cellSize,
+            this.positions.boardTop + y * this.positions.cellSize
           );
         });
       });
       s.placeImageXY(
-        this.board.garbage.draw(this.board.height),
-        this.board.width * CELL_SIZE + CELL_SIZE / 2,
-        this.board.height / 2 * CELL_SIZE
+        this.board.garbage.draw(this.positions.boardRows),
+        this.positions.boardRight,
+        this.positions.boardTop + this.positions.boardRows / 2 * this.positions.cellSize
       );
+      const shadow = this.board.fallingpiece;
+      const storedpos = new import_impworld11.Posn(
+        this.board.fallingpiece.position.x,
+        this.board.fallingpiece.position.y
+      );
+      for (let i = shadow.position.y; i < this.positions.boardRows - 1; i++) {
+        if (this.board.fallingpiece.checkOverlap(
+          this.board,
+          this.board.fallingpiece.piece.first,
+          new import_impworld11.Posn(0, i - shadow.position.y + 1)
+        )) {
+          shadow.position = new import_impworld11.Posn(shadow.position.x, i);
+          break;
+        }
+      }
+      if (shadow.position == storedpos) {
+        shadow.position = new import_impworld11.Posn(
+          shadow.position.x,
+          this.positions.boardRows - shadow.getEmptyLineCountY()
+        );
+      }
+      shadow.drawPiece(this.board.theme, s, this.board.theme.shadow, this.positions);
+      shadow.position = storedpos;
       this.board.fallingpiece.drawPiece(
-        this.board.t,
+        this.board.theme,
         s,
-        this.board.pieceToImage(this.board.fallingpiece)
+        this.board.pieceToImage(this.board.fallingpiece),
+        this.positions
       );
       s.placeImageXY(
-        this.board.t.holdbox,
-        Math.floor(width + this.board.t.holdbox.getWidth() / 2 + CELL_SIZE),
-        Math.floor(this.board.t.holdbox.getHeight() / 2)
+        this.board.theme.holdbox,
+        this.positions.boardRight + this.positions.cellSize + this.board.theme.holdbox.getWidth() / 2,
+        this.positions.boardTop + Math.floor(this.board.theme.holdbox.getHeight() / 2)
       );
       if (this.board.hold) {
         const p = this.board.tetriminoToPiece(this.board.hold);
         p.position = new import_impworld11.Posn(
-          11.25,
-          0.5
+          this.positions.boardColumns + 2.5,
+          0.6
         );
-        p.drawPiece(this.board.t, s, this.board.pieceToImage(p));
+        p.drawPiece(this.board.theme, s, this.board.pieceToImage(p), this.positions);
       }
       s.placeImageXY(
         new import_impworld11.TextImage("LINES:  " + this.stats.lines, import_impworld11.Color.WHITE).movePinhole(
           linemeter.getWidth() * -1 / 2,
           0
         ),
-        width + CELL_SIZE,
-        _GameState.FIRST_METER_SPACING
+        this.positions.boardRight + this.positions.cellSize,
+        this.positions.boardTop + this.positions.firstMeterSpacing
       );
       s.placeImageXY(
         atkmeter.movePinhole(atkmeter.getWidth() * -1 / 2, 0),
-        width + CELL_SIZE,
-        Math.floor(_GameState.METER_SPACING * 2.5)
+        this.positions.boardRight + this.positions.cellSize,
+        Math.floor(this.positions.meterSpacing * 2.5)
       );
       s.placeImageXY(
         timemeter.movePinhole(timemeter.getWidth() * -1 / 2, 0),
-        width + CELL_SIZE,
-        _GameState.METER_SPACING * 3
+        this.positions.boardRight + this.positions.cellSize,
+        this.positions.meterSpacing * 3
       );
       s.placeImageXY(
         piecemeter.movePinhole(piecemeter.getWidth() * -1 / 2, 0),
-        width + CELL_SIZE,
-        Math.floor(_GameState.METER_SPACING * 3.5)
+        this.positions.boardRight + this.positions.cellSize,
+        Math.floor(this.positions.meterSpacing * 3.5)
       );
       s.placeImageXY(
         b2bmeter.movePinhole(b2bmeter.getWidth() * -1 / 2, 0),
-        width + CELL_SIZE,
-        _GameState.METER_SPACING * 4
+        this.positions.boardRight + this.positions.cellSize,
+        this.positions.meterSpacing * 4
       );
       s.placeImageXY(
         combometer.movePinhole(combometer.getWidth() * -1 / 2, 0),
-        width + CELL_SIZE,
-        _GameState.METER_SPACING * 5
+        this.positions.boardRight + this.positions.cellSize,
+        this.positions.meterSpacing * 5
       );
       for (let i = 0; i < 5; i++) {
         const queuepiece = this.board.tetriminoToPiece(this.board.queue[i]);
-        queuepiece.position = new import_impworld11.Posn(width / CELL_SIZE + 4, (i + 2) * 4);
-        queuepiece.drawPiece(this.board.t, s, this.board.pieceToImage(queuepiece));
+        queuepiece.position = new import_impworld11.Posn(this.positions.boardRight / this.positions.cellSize + 4, (i + 2) * 4);
+        queuepiece.drawPiece(this.board.theme, s, this.board.pieceToImage(queuepiece), this.positions);
       }
       for (let i = 0; i < this.board.ornaments.length; i++) {
         const ornament = this.board.ornaments[i];
@@ -14624,7 +14654,7 @@
         this.storedval = 0;
         this.stats.decostarttime = Date.now();
       }
-      s.placeImageXY(songname.movePinhole(0, -songname.getHeight() / 2), width / 2, height);
+      s.placeImageXY(songname.movePinhole(0, -songname.getHeight() / 2), this.positions.width / 2, this.positions.boardBottom);
       return s;
     }
     onKeyEvent(key) {
@@ -14708,19 +14738,19 @@
           this.board.spin = this.spin;
           break;
         case "r":
-          this.board = new Board();
+          this.board = new Board(this.positions);
           this.stats = new GameStats();
       }
     }
     onGesture(name) {
-      this.onKeyEvent(
-        {
-          swipeleft: "left",
-          swiperight: "right",
-          swipeup: "up",
-          swipedown: "down"
-        }[name]
-      );
+      const key = {
+        swipeleft: "left",
+        swiperight: "right",
+        swipeup: "up",
+        swipedown: "down"
+      }[name];
+      this.onKeyEvent(key);
+      setTimeout(() => this.onKeyReleased(key), 100);
     }
     onKeyReleased(key) {
       switch (key) {
@@ -14774,8 +14804,8 @@
     ...Object.values(FilePaths.image.enemies)
   ).then(() => {
     try {
-      const game = new GameState();
-      game.bigBang(GameState.SCREEN_WIDTH, GameState.SCREEN_HEIGHT, GameState.GAME_SPEED);
+      const game = new GameState(window.innerWidth, window.innerHeight);
+      game.bigBang(window.innerWidth, window.innerHeight, GameState.GAME_SPEED);
     } catch (e) {
       console.error(e);
     }
