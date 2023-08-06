@@ -1,5 +1,5 @@
+import { GamePositions } from '@/GamePositions';
 import { Board } from '@/board';
-import { CELL_SIZE } from '@/constants';
 import { Theme } from '@/themes/Theme';
 import {
   AlignModeX,
@@ -22,7 +22,7 @@ export class GarbageMeter {
   maxaccept: number; // max amt accepted garbage.
   // ex: if 20 lines are queued but maxaccept is 8, 8 lines of cheese will be added to the board per non line clear piece placed
 
-  constructor(g: number = 0, max: number = 8) {
+  constructor(private pos: GamePositions, g: number = 0, max: number = 8) {
     this.garbage = g;
     this.maxaccept = max;
   }
@@ -35,20 +35,30 @@ export class GarbageMeter {
 
   draw(height: number): WorldImage {
     const meter = new OverlayImage(
-      new RectangleImage(CELL_SIZE, CELL_SIZE * height, OutlineMode.OUTLINE, Color.WHITE),
-      new RectangleImage(CELL_SIZE, CELL_SIZE * height, OutlineMode.SOLID, Color.BLACK),
+      new RectangleImage(
+        this.pos.cellSize,
+        this.pos.cellSize * height,
+        OutlineMode.OUTLINE,
+        Color.WHITE,
+      ),
+      new RectangleImage(
+        this.pos.cellSize,
+        this.pos.cellSize * height,
+        OutlineMode.SOLID,
+        Color.BLACK,
+      ),
     );
     const garbagedisplay =
       this.garbage > 0
         ? new RectangleImage(
-            CELL_SIZE,
-            Math.min(CELL_SIZE * 20, CELL_SIZE * this.garbage),
+            this.pos.cellSize,
+            Math.min(this.pos.cellSize * 20, this.pos.cellSize * this.garbage),
             OutlineMode.SOLID,
             Color.RED,
           )
         : new RectangleImage(
-            CELL_SIZE,
-            Math.min(CELL_SIZE * 20, CELL_SIZE * -this.garbage),
+          this.pos.cellSize,
+            Math.min(this.pos.cellSize * 20, this.pos.cellSize * -this.garbage),
             OutlineMode.SOLID,
             Theme.SKYBLUE,
           );
@@ -62,8 +72,8 @@ export class GarbageMeter {
       meter,
     );
     const maxbar = new RectangleImage(
-      CELL_SIZE,
-      CELL_SIZE * this.maxaccept,
+      this.pos.cellSize,
+      this.pos.cellSize * this.maxaccept,
       OutlineMode.OUTLINE,
       Color.WHITE,
     );

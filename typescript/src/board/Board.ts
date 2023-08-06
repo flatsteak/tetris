@@ -1,8 +1,9 @@
+import { GamePositions } from '@/GamePositions';
 import { GameState } from '@/GameState';
 import { Queue } from '@/board';
 import { BeatmapSingerBot } from '@/bot/BeatmapSingerBot';
 import { VSingerBot } from '@/bot/VSingerBot';
-import { CELL_SIZE, FilePaths } from '@/constants';
+import { FilePaths } from '@/constants';
 import { APiece } from '@/pieces/APiece';
 import { AttackTable } from '@/pieces/AttackTable';
 import { IPiece } from '@/pieces/IPiece';
@@ -22,12 +23,10 @@ import { tetriminoToResidue } from '@/util/tetriminoToResidue';
 import { Color, FromFileImage, OverlayImage, Posn, RotateImage, TextImage, WorldImage } from 'impworld';
 
 export class Board {
-  height: number;
-  width: number;
   residue: Residue[][];
   currentcombo: number;
   b2b: number;
-  t: Theme;
+  theme: Theme;
   queue: Tetrimino[];
   fallingpiece: APiece;
   hold: Tetrimino | undefined;
@@ -39,22 +38,20 @@ export class Board {
   spin: boolean;
   gameovertrigger: boolean;
 
-  constructor() {
-    this.height = 20;
-    this.width = 10;
+  constructor(public readonly positions: GamePositions) {
     this.residue = [];
-    for (let i = 0; i < this.height; i++) {
+    for (let i = 0; i < this.positions.boardRows; i++) {
       this.residue.push(this.newEmptyRow());
     }
     this.currentcombo = 0;
     this.b2b = 0;
-    this.t = ThemePool.FADE_THEME;
+    this.theme = ThemePool.FADE_THEME(positions);
     this.queue = Queue.sevenBag();
     this.queue.push(...Queue.sevenBag());
     this.fallingpiece = this.pullFromBag(this.queue);
     this.hold = undefined;
     this.pieceplaced = false;
-    this.garbage = new GarbageMeter();
+    this.garbage = new GarbageMeter(positions);
     this.ornaments = [];
     this.anims = [];
     this.bgimage = new FromFileImage(FilePaths.image.bg.BGSTARRY);
@@ -80,7 +77,7 @@ export class Board {
   }
 
   addCheese(lines: number): void {
-    const well = Math.floor(Math.random() * this.width);
+    const well = Math.floor(Math.random() * this.positions.boardColumns);
     const cheeseline = this.newLineOfCheese(well);
     for (let i = 0; i < lines; i++) {
       this.residue.shift();
@@ -113,7 +110,7 @@ export class Board {
   }
 
   overlap(p: Posn): boolean {
-    if (p.x >= this.width || p.x < 0) {
+    if (p.x >= this.positions.boardColumns || p.x < 0) {
       return true;
     }
     switch (this.getResidueAt(p)) {
@@ -144,13 +141,13 @@ export class Board {
   }
 
   newEmptyRow(): Residue[] {
-    return new Array<Residue>(this.width).fill(Residue.EMPTY);
+    return new Array<Residue>(this.positions.boardColumns).fill(Residue.EMPTY);
   }
 
   removeRows(g: GameState): number {
     console.log(this.currentcombo);
     let toremove: number[] = [];
-    for (let i = 0; i < this.height; i++) {
+    for (let i = 0; i < this.positions.boardRows; i++) {
       let row: Residue[] = this.residue[i];
       if (!row.includes(Residue.EMPTY)) {
         toremove.push(i);
@@ -185,7 +182,7 @@ export class Board {
       this.b2b += 1;
     }
 
-    let placeat = new Posn((this.width / 2) * CELL_SIZE, toremove[0] * CELL_SIZE);
+    let placeat = new Posn((this.positions.boardColumns / 2) * this.positions.cellSize, toremove[0] * this.positions.cellSize);
     let displayatk = atk;
     if (atk !== 0) {
       if (Date.now() - g.stats.decostarttime < GameState.DECO_DURATION && this.ornaments.length > 0) {
@@ -252,13 +249,13 @@ export class Board {
   }
 
   getResidueAt(p: Posn): Residue {
-    if (p.y >= this.height || p.x < 0) {
+    if (p.y >= this.positions.boardRows || p.x < 0) {
       return Residue.FLOOR;
     }
     if (p.y >= this.residue.length || p.y < 0) {
       return Residue.EMPTY;
     }
-    if (p.x >= this.width) {
+    if (p.x >= this.positions.boardColumns) {
       return Residue.EMPTY;
     }
 
@@ -268,24 +265,24 @@ export class Board {
   drawResidue(r: Residue): WorldImage {
     switch (r) {
       case Residue.S:
-        return this.t.s;
+        return this.theme.s;
       case Residue.Z:
-        return this.t.z;
+        return this.theme.z;
       case Residue.O:
-        return this.t.o;
+        return this.theme.o;
       case Residue.I:
-        return this.t.i;
+        return this.theme.i;
       case Residue.J:
-        return this.t.j;
+        return this.theme.j;
       case Residue.L:
-        return this.t.l;
+        return this.theme.l;
       case Residue.T:
-        return this.t.t;
+        return this.theme.t;
       case Residue.CHEESE:
-        return this.t.cheese;
+        return this.theme.cheese;
       case Residue.EMPTY:
       case Residue.FLOOR:
-        return this.t.empty;
+        return this.theme.empty;
       default:
         throw new Error(`Unknown residue ${r}`);
     }
@@ -293,27 +290,27 @@ export class Board {
 
   pieceToImage(a: APiece): WorldImage {
     if (a instanceof SPiece) {
-      return this.t.s;
+      return this.theme.s;
     }
     if (a instanceof ZPiece) {
-      return this.t.z;
+      return this.theme.z;
     }
     if (a instanceof OPiece) {
-      return this.t.o;
+      return this.theme.o;
     }
     if (a instanceof IPiece) {
-      return this.t.i;
+      return this.theme.i;
     }
     if (a instanceof JPiece) {
-      return this.t.j;
+      return this.theme.j;
     }
     if (a instanceof LPiece) {
-      return this.t.l;
+      return this.theme.l;
     }
     if (a instanceof TPiece) {
-      return this.t.t;
+      return this.theme.t;
     }
-    return this.t.empty;
+    return this.theme.empty;
   }
 
   private pullFromBag(queue: Tetrimino[]): APiece {
@@ -323,7 +320,7 @@ export class Board {
   }
 
   tetriminoToPiece(pull: Tetrimino) {
-    const spawn = new Posn(this.width / 2 - 2, 0);
+    const spawn = new Posn(this.positions.boardColumns / 2 - 2, 0);
     switch (pull) {
       case Tetrimino.S:
         const spiece = new SPiece(spawn);

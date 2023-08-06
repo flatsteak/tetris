@@ -22,5 +22,3 @@ export const FilePaths = {
     },
   },
 } as const;
-
-export const CELL_SIZE = 20;

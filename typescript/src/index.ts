@@ -13,8 +13,8 @@ FromFileImage.preload(
   ...Object.values(FilePaths.image.enemies),
 ).then(() => {
   try {
-    const game = new GameState();
-    game.bigBang(GameState.SCREEN_WIDTH, GameState.SCREEN_HEIGHT, GameState.GAME_SPEED);
+    const game = new GameState(window.innerWidth, window.innerHeight);
+    game.bigBang(window.innerWidth, window.innerHeight, GameState.GAME_SPEED);
   } catch (e) {
     console.error(e);
   }

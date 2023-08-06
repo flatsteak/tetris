@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { RuleType, Ruleset } from '@/Ruleset';
 import { Board } from '@/board';
 import { SingerBot } from '@/bot/SingerBot';
-import { CELL_SIZE, FilePaths } from '@/constants';
+import { FilePaths } from '@/constants';
 import { GameStats } from '@/util/GameStats';
 import { AtkMeter, PiecesMeter, TimeMeter } from '@/util/Meter';
 import { pickRandom } from '@/util/pickRandom';
@@ -14,12 +14,13 @@ import {
   WorldEnd,
   WorldScene,
 } from 'impworld';
-import { Residue } from './pieces/Residue';
 import { AudioPlayer } from './ui/AudioPlayer';
 import { Rotation } from './pieces/Rotation';
+import { GamePositions } from './GamePositions';
 
 export class GameState extends World {
-  board = new Board();
+  board: Board;
+  positions: GamePositions;
   rules = new Ruleset(RuleType.VS, 100);
   stats = new GameStats();
   keyheldtime?: number;
@@ -40,19 +41,15 @@ export class GameState extends World {
   static ARR = 0; // in ms
   static SDF = 0; // in ms
 
-  static METER_SPACING = CELL_SIZE * 2;
-  static FIRST_METER_SPACING = CELL_SIZE * 4;
-
   static GAME_SPEED = .1;
   static INVERT_SPEED = Math.floor(1 / GameState.GAME_SPEED);
 
   static DECO_DURATION = 2000;
 
-  static SCREEN_WIDTH = document.getElementById('world')?.clientWidth ?? 500;
-  static SCREEN_HEIGHT = document.getElementById('world')?.clientHeight ?? 500;
-
-  constructor() {
+  constructor(width: number, height: number) {
     super();
+    this.positions = new GamePositions(width, height);
+    this.board = new Board(this.positions);
   }
 
   worldEnds(): WorldEnd {
@@ -64,25 +61,18 @@ export class GameState extends World {
   }
 
   makeScene() {
-    let width: number = CELL_SIZE * this.board.width;
-    let height: number = CELL_SIZE * this.board.height;
     let systime: number = Date.now();
     let time: number = systime - this.stats.starttime;
 
-    let s: WorldScene = new WorldScene(new Posn(width, height));
+    let s: WorldScene = this.getEmptyScene();
     let singerpos: Posn = new Posn(
-      GameState.SCREEN_WIDTH - Math.floor(this.bot.getSinger().getWidth() / 2),
-      GameState.SCREEN_HEIGHT - Math.floor(this.bot.getSinger().getWidth() / 2),
+      this.positions.width - Math.floor(this.bot.getSinger().getWidth() / 2),
+      this.positions.height - Math.floor(this.bot.getSinger().getWidth() / 2),
     );
 
     if (time == 0) {
       time += 1;
     }
-    s.placeImageXY(
-      this.board.bgimage,
-      Math.round(this.board.bgimage.getWidth() / 2),
-      Math.round(this.board.bgimage.getHeight() / 2),
-    );
 
     const linemeter = new TextImage('LINES:  ' + this.stats.lines, Color.WHITE);
     const atkmeter = new AtkMeter(this.stats.atk, time).getMeterVal();
@@ -102,26 +92,25 @@ export class GameState extends World {
     this.board.residue.forEach((row, y) => {
       row.forEach((cell, x) => {
         s.placeImageXY(
-          this.board.drawResidue(cell).movePinhole(-CELL_SIZE / 2, -CELL_SIZE / 2),
-          x * CELL_SIZE,
-          y * CELL_SIZE,
+          this.board.drawResidue(cell).movePinhole(-this.positions.cellSize / 2, -this.positions.cellSize / 2),
+          this.positions.boardLeft + x * this.positions.cellSize,
+          this.positions.boardTop + y * this.positions.cellSize,
         );
       });
     })
 
     s.placeImageXY(
-      this.board.garbage.draw(this.board.height),
-      this.board.width * CELL_SIZE + CELL_SIZE / 2,
-      (this.board.height / 2) * CELL_SIZE,
+      this.board.garbage.draw(this.positions.boardRows),
+      this.positions.boardRight,
+      this.positions.boardTop + (this.positions.boardRows / 2) * this.positions.cellSize,
     );
 
-    /*
     const shadow = this.board.fallingpiece;
     const storedpos = new Posn(
       this.board.fallingpiece.position.x,
       this.board.fallingpiece.position.y,
     );
-    for (let i = shadow.position.y; i < this.board.height - 1; i++) {
+    for (let i = shadow.position.y; i < this.positions.boardRows - 1; i++) {
       if (
         this.board.fallingpiece.checkOverlap(
           this.board,
@@ -136,71 +125,72 @@ export class GameState extends World {
     if (shadow.position == storedpos) {
       shadow.position = new Posn(
         shadow.position.x,
-        this.board.height - shadow.getEmptyLineCountY(),
+        this.positions.boardRows - shadow.getEmptyLineCountY(),
       );
     }
 
-    shadow.drawPiece(this.board.t, s, this.board.t.shadow);
+    shadow.drawPiece(this.board.theme, s, this.board.theme.shadow, this.positions);
     shadow.position = storedpos;
-    */
 
     this.board.fallingpiece.drawPiece(
-      this.board.t,
+      this.board.theme,
       s,
       this.board.pieceToImage(this.board.fallingpiece),
+      this.positions,
     );
 
     s.placeImageXY(
-      this.board.t.holdbox,
-      Math.floor(width + this.board.t.holdbox.getWidth() / 2 + CELL_SIZE),
-      Math.floor(this.board.t.holdbox.getHeight() / 2),
+      this.board.theme.holdbox,
+      this.positions.boardRight + this.positions.cellSize + this.board.theme.holdbox.getWidth() / 2,
+      this.positions.boardTop + Math.floor(this.board.theme.holdbox.getHeight() / 2),
     );
     if (this.board.hold) {
       const p = this.board.tetriminoToPiece(this.board.hold);
       p.position = new Posn(
-        11.25,
-        0.5,
+        this.positions.boardColumns + 2.5,
+        0.6,
       );
-      p.drawPiece(this.board.t, s, this.board.pieceToImage(p));
+      p.drawPiece(this.board.theme, s, this.board.pieceToImage(p), this.positions);
     }
+
     s.placeImageXY(
       new TextImage('LINES:  ' + this.stats.lines, Color.WHITE).movePinhole(
         (linemeter.getWidth() * -1) / 2,
         0,
       ),
-      width + CELL_SIZE,
-      GameState.FIRST_METER_SPACING,
+      this.positions.boardRight + this.positions.cellSize,
+      this.positions.boardTop + this.positions.firstMeterSpacing,
     );
     s.placeImageXY(
       atkmeter.movePinhole((atkmeter.getWidth() * -1) / 2, 0),
-      width + CELL_SIZE,
-      Math.floor(GameState.METER_SPACING * 2.5),
+      this.positions.boardRight + this.positions.cellSize,
+      Math.floor(this.positions.meterSpacing * 2.5),
     );
     s.placeImageXY(
       timemeter.movePinhole((timemeter.getWidth() * -1) / 2, 0),
-      width + CELL_SIZE,
-      GameState.METER_SPACING * 3,
+      this.positions.boardRight + this.positions.cellSize,
+      this.positions.meterSpacing * 3,
     );
     s.placeImageXY(
       piecemeter.movePinhole((piecemeter.getWidth() * -1) / 2, 0),
-      width + CELL_SIZE,
-      Math.floor(GameState.METER_SPACING * 3.5),
+      this.positions.boardRight + this.positions.cellSize,
+      Math.floor(this.positions.meterSpacing * 3.5),
     );
     s.placeImageXY(
       b2bmeter.movePinhole((b2bmeter.getWidth() * -1) / 2, 0),
-      width + CELL_SIZE,
-      GameState.METER_SPACING * 4,
+      this.positions.boardRight + this.positions.cellSize,
+      this.positions.meterSpacing * 4,
     );
     s.placeImageXY(
       combometer.movePinhole((combometer.getWidth() * -1) / 2, 0),
-      width + CELL_SIZE,
-      GameState.METER_SPACING * 5,
+      this.positions.boardRight + this.positions.cellSize,
+      this.positions.meterSpacing * 5,
     );
 
     for (let i = 0; i < 5; i++) {
       const queuepiece = this.board.tetriminoToPiece(this.board.queue[i]);
-      queuepiece.position = new Posn(width / CELL_SIZE + 4, (i + 2) * 4);
-      queuepiece.drawPiece(this.board.t, s, this.board.pieceToImage(queuepiece));
+      queuepiece.position = new Posn(this.positions.boardRight / this.positions.cellSize + 4, (i + 2) * 4);
+      queuepiece.drawPiece(this.board.theme, s, this.board.pieceToImage(queuepiece), this.positions);
     }
 
     // ornament drawing
@@ -221,7 +211,7 @@ export class GameState extends World {
       this.stats.decostarttime = Date.now();
     }
 
-    s.placeImageXY(songname.movePinhole(0, -songname.getHeight() / 2), width / 2, height);
+    s.placeImageXY(songname.movePinhole(0, -songname.getHeight() / 2), this.positions.width / 2, this.positions.boardBottom);
 
     // animation drawing
     // for (let i = 0; i < this.board.anims.length; i++) {
@@ -322,20 +312,20 @@ export class GameState extends World {
         this.board.spin = this.spin;
         break;
       case 'r':
-        this.board = new Board();
+        this.board = new Board(this.positions);
         this.stats = new GameStats();
     }
   }
 
   protected onGesture(name: 'swipeleft' | 'swiperight' | 'swipeup' | 'swipedown') {
-    this.onKeyEvent(
-      {
-        swipeleft: 'left',
-        swiperight: 'right',
-        swipeup: 'up',
-        swipedown: 'down',
-      }[name],
-    );
+    const key = {
+      swipeleft: 'left',
+      swiperight: 'right',
+      swipeup: 'up',
+      swipedown: 'down',
+    }[name];
+    this.onKeyEvent(key);
+    setTimeout(() => this.onKeyReleased(key), 100);
   }
 
   protected onKeyReleased(key: string) {

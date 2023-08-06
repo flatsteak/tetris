@@ -4,7 +4,7 @@ import { Tetrimino } from './Tetrimino';
 import { Board } from '@/board';
 import { Rotation } from '@/pieces/Rotation';
 import { Theme } from '@/themes/Theme';
-import { CELL_SIZE } from '@/constants';
+import { GamePositions } from '@/GamePositions';
 
 export abstract class APiece {
   position: Posn;
@@ -116,13 +116,13 @@ export abstract class APiece {
   }
 
   softDropInf(b: Board): void {
-    for (let i = this.position.y; i < b.height; i++) {
+    for (let i = this.position.y; i < b.positions.boardRows; i++) {
       if (this.checkOverlap(b, this.piece.first, new Posn(0, i - this.position.y + 1))) {
         this.position = new Posn(this.position.x, i);
         return;
       }
     }
-    this.position = new Posn(this.position.x, b.height - this.getEmptyLineCountY());
+    this.position = new Posn(this.position.x, b.positions.boardRows - this.getEmptyLineCountY());
   }
 
   moveLeftInf(b: Board) {
@@ -136,17 +136,17 @@ export abstract class APiece {
 	}
 
   moveRightInf(b: Board): void {
-    for (let i = this.position.x; i < b.width; i++) {
+    for (let i = this.position.x; i < b.positions.boardColumns; i++) {
       if (this.checkOverlap(b, this.piece.first, new Posn(i - this.position.x + 1, 0))) {
         this.position = new Posn(i, this.position.y);
         return;
       }
     }
-    this.position = new Posn(b.width - this.getEmptyLineCountFromRight(), this.position.y);
+    this.position = new Posn(b.positions.boardColumns - this.getEmptyLineCountFromRight(), this.position.y);
   }
 
   hardDrop(b: Board): void {
-    for (let i = this.position.y; i < b.height; i++) {
+    for (let i = this.position.y; i < b.positions.boardRows; i++) {
       if (this.checkOverlap(b, this.piece.first, new Posn(0, i - this.position.y + 1))) {
         this.position = new Posn(this.position.x, i);
         b.placePiece(this);
@@ -154,7 +154,7 @@ export abstract class APiece {
       }
     }
 
-    this.position = new Posn(this.position.x, b.height - this.getEmptyLineCountY());
+    this.position = new Posn(this.position.x, b.positions.boardRows - this.getEmptyLineCountY());
     b.placePiece(this);
     b.pieceplaced = true;
   }
@@ -233,14 +233,14 @@ export abstract class APiece {
   abstract hasSpun(b: Board): boolean;
   abstract rotInitialState(s: string): boolean[][];
 
-  drawPiece(t: Theme, s: WorldScene, cell: WorldImage) {
+  drawPiece(t: Theme, s: WorldScene, cell: WorldImage, position: GamePositions) {
 		for (let i = 0; i < 4; i++) {
 			for (let j = 0; j < 4; j++) {
 				if (this.piece.first[i][j]) {
 					s.placeImageXY(
 						cell,
-						(j + this.position.x) * CELL_SIZE + CELL_SIZE / 2,
-						(i + this.position.y) * CELL_SIZE + CELL_SIZE / 2);
+						position.boardLeft + (j + this.position.x) * position.cellSize + position.cellSize / 2,
+						position.boardTop + (i + this.position.y) * position.cellSize + position.cellSize / 2);
 				}
 			}
 		}
