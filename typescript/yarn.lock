@@ -311,10 +311,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openapi-typescript-infra/coconfig@npm:^3.3.5":
-  version: 3.3.5
-  resolution: "@openapi-typescript-infra/coconfig@npm:3.3.5"
-  checksum: 188c9989fe7f0e39682dfa1f0920e689ef54b3124ab38626941e8650c75f10ae5c58dfcda859bf887e5a041c3ae26aefabe54ced8b1161ed7b83d8fa432b7485
+"@openapi-typescript-infra/coconfig@npm:^3.3.6":
+  version: 3.3.6
+  resolution: "@openapi-typescript-infra/coconfig@npm:3.3.6"
+  checksum: 367841e14262b9eecd1688810fb0977801561826889418e099a2b2122af398d0cf85155bfb8af3336ea211bd8119812ffeee45b51a470bd3efce6cf3bdae0dd3
   languageName: node
   linkType: hard
 
@@ -1240,12 +1240,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"impworld@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "impworld@npm:1.1.1"
+"impworld@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "impworld@npm:1.2.3"
   dependencies:
     konva: ^9.2.0
-  checksum: 7a28dac3f94765b7bb1e31e7764809b962d1b6b5f85b578cb2e342c4c42f1eaa68995e669bb43b5c525c0ded808bcba29e0492944a9c8fbb7c42b88e2116f97b
+  checksum: 86d3ba8ba9d129eab59f1e342396dbd35842957e184afa8a0960701a7e17ee6071fecbd7ea677cb6d23cba611be32197aa69308de38740b67eedbef9bf912ab2
   languageName: node
   linkType: hard
 
@@ -2344,10 +2344,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "tetris@workspace:."
   dependencies:
-    "@openapi-typescript-infra/coconfig": ^3.3.5
+    "@openapi-typescript-infra/coconfig": ^3.3.6
     coconfig: ^0.13.3
-    impworld: ^1.1.1
-    tsup: ^7.1.0
+    impworld: ^1.2.3
+    tsup: ^7.2.0
   languageName: unknown
   linkType: soft
 
@@ -2441,9 +2441,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsup@npm:^7.1.0":
-  version: 7.1.0
-  resolution: "tsup@npm:7.1.0"
+"tsup@npm:^7.2.0":
+  version: 7.2.0
+  resolution: "tsup@npm:7.2.0"
   dependencies:
     bundle-require: ^4.0.0
     cac: ^6.7.12
@@ -2473,7 +2473,7 @@ __metadata:
   bin:
     tsup: dist/cli-default.js
     tsup-node: dist/cli-node.js
-  checksum: 5639c0f4990a89de6e55f9d77f53b8c3706e6d24700e37dd1fc696abda83017b02be7f514f4e7ce655b1e443b8f4d09ca0aca398b5767cad23466a18bd6e06b2
+  checksum: 94feae12b0a0dd0eaa3ed1c412d2bc51d7491ff91abc61e4198495dcb612a848a9fd346fbb668a63b98534fc6c2569ab3aba7ea95ad8db5eaf29c4a4885c2313
   languageName: node
   linkType: hard
 

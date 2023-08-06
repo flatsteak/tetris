@@ -276,15 +276,18 @@ export class Board {
       case Residue.I:
         return this.t.i;
       case Residue.J:
-        return this.t.j;
+        return this.t.j.copy();
       case Residue.L:
         return this.t.l;
       case Residue.T:
         return this.t.t;
       case Residue.CHEESE:
         return this.t.cheese;
-      default:
+      case Residue.EMPTY:
+      case Residue.FLOOR:
         return this.t.empty;
+      default:
+        throw new Error(`Unknown residue ${r}`);
     }
   }
 
