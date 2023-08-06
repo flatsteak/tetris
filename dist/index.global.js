@@ -11696,6 +11696,167 @@
     }
   });
 
+  // node_modules/touchsweep/dist/touchsweep.js
+  var require_touchsweep = __commonJS({
+    "node_modules/touchsweep/dist/touchsweep.js"(exports, module) {
+      "use strict";
+      (function(global2, factory) {
+        typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : (global2 = typeof globalThis !== "undefined" ? globalThis : global2 || self, factory(global2.Touchsweep = {}));
+      })(exports, function(exports2) {
+        "use strict";
+        var __assign = function() {
+          __assign = Object.assign || function __assign2(t) {
+            for (var s, i = 1, n = arguments.length; i < n; i++) {
+              s = arguments[i];
+              for (var p in s)
+                if (Object.prototype.hasOwnProperty.call(s, p))
+                  t[p] = s[p];
+            }
+            return t;
+          };
+          return __assign.apply(this, arguments);
+        };
+        exports2.TouchSwipeEventType = void 0;
+        (function(TouchSwipeEventType) {
+          TouchSwipeEventType["up"] = "swipeup";
+          TouchSwipeEventType["tap"] = "tap";
+          TouchSwipeEventType["down"] = "swipedown";
+          TouchSwipeEventType["move"] = "swipemove";
+          TouchSwipeEventType["left"] = "swipeleft";
+          TouchSwipeEventType["right"] = "swiperight";
+        })(exports2.TouchSwipeEventType || (exports2.TouchSwipeEventType = {}));
+        var defaultCoordinates = {
+          endX: 0,
+          endY: 0,
+          moveX: 0,
+          moveY: 0,
+          startX: 0,
+          startY: 0
+        };
+        var TouchSweep = (
+          /** @class */
+          function() {
+            function TouchSweep2(element, data, threshold) {
+              if (element === void 0) {
+                element = document.body;
+              }
+              if (data === void 0) {
+                data = {};
+              }
+              if (threshold === void 0) {
+                threshold = 40;
+              }
+              this.element = element;
+              this.eventData = data;
+              this.threshold = threshold;
+              this.coords = defaultCoordinates;
+              this.isMoving = false;
+              this.moveCoords = { x: 0, y: 0 };
+              this.onStart = this.onStart.bind(this);
+              this.onMove = this.onMove.bind(this);
+              this.onEnd = this.onEnd.bind(this);
+              this.bind();
+              return this;
+            }
+            TouchSweep2.prototype.bind = function() {
+              var element = this.element;
+              element.addEventListener("touchstart", this.onStart, false);
+              element.addEventListener("touchmove", this.onMove, false);
+              element.addEventListener("touchend", this.onEnd, false);
+              element.addEventListener("mousedown", this.onStart, false);
+              element.addEventListener("mousemove", this.onMove, false);
+              element.addEventListener("mouseup", this.onEnd, false);
+            };
+            TouchSweep2.prototype.unbind = function() {
+              var element = this.element;
+              element.removeEventListener("touchstart", this.onStart, false);
+              element.removeEventListener("touchmove", this.onMove, false);
+              element.removeEventListener("touchend", this.onEnd, false);
+              element.removeEventListener("mousedown", this.onStart, false);
+              element.removeEventListener("mousemove", this.onMove, false);
+              element.removeEventListener("mouseup", this.onEnd, false);
+            };
+            TouchSweep2.prototype.getCoords = function(event) {
+              var result = this.moveCoords;
+              var isMouseEvent = "pageX" in event;
+              result.x = isMouseEvent ? event.pageX : event.changedTouches[0].screenX;
+              result.y = isMouseEvent ? event.pageY : event.changedTouches[0].screenY;
+              return result;
+            };
+            TouchSweep2.prototype.resetCoords = function() {
+              this.coords = defaultCoordinates;
+            };
+            TouchSweep2.prototype.getEndEventName = function() {
+              var threshold = this.threshold;
+              var _a = this.coords, startX = _a.startX, startY = _a.startY, endX = _a.endX, endY = _a.endY;
+              var distanceX = Math.abs(endX - startX);
+              var distanceY = Math.abs(endY - startY);
+              var isSwipeX = distanceX > distanceY;
+              if (isSwipeX) {
+                if (endX < startX && distanceX > threshold) {
+                  return exports2.TouchSwipeEventType.left;
+                }
+                if (endX > startX && distanceX > threshold) {
+                  return exports2.TouchSwipeEventType.right;
+                }
+              } else {
+                if (endY < startY && distanceY > threshold) {
+                  return exports2.TouchSwipeEventType.up;
+                }
+                if (endY > startY && distanceY > threshold) {
+                  return exports2.TouchSwipeEventType.down;
+                }
+              }
+              if (endY === startY && endX === startX) {
+                return exports2.TouchSwipeEventType.tap;
+              }
+              return "";
+            };
+            TouchSweep2.prototype.dispatchEvent = function(type) {
+              var event = new CustomEvent(type, {
+                detail: __assign(__assign({}, this.eventData), { coords: this.coords })
+              });
+              this.element.dispatchEvent(event);
+            };
+            TouchSweep2.prototype.dispatchEnd = function() {
+              var eventName = this.getEndEventName();
+              if (!eventName) {
+                return;
+              }
+              this.dispatchEvent(eventName);
+            };
+            TouchSweep2.prototype.onStart = function(event) {
+              var _a = this.getCoords(event), x = _a.x, y = _a.y;
+              this.isMoving = true;
+              this.coords.startX = x;
+              this.coords.startY = y;
+            };
+            TouchSweep2.prototype.onMove = function(event) {
+              if (!this.isMoving) {
+                return;
+              }
+              var _a = this.getCoords(event), x = _a.x, y = _a.y;
+              this.coords.moveX = x;
+              this.coords.moveY = y;
+              this.dispatchEvent(exports2.TouchSwipeEventType.move);
+            };
+            TouchSweep2.prototype.onEnd = function(event) {
+              var _a = this.getCoords(event), x = _a.x, y = _a.y;
+              this.isMoving = false;
+              this.coords.endX = x;
+              this.coords.endY = y;
+              this.dispatchEnd();
+              this.resetCoords();
+            };
+            return TouchSweep2;
+          }()
+        );
+        exports2.default = TouchSweep;
+        Object.defineProperty(exports2, "__esModule", { value: true });
+      });
+    }
+  });
+
   // node_modules/impworld/dist/index.js
   var require_dist = __commonJS({
     "node_modules/impworld/dist/index.js"(exports, module) {
@@ -12452,6 +12613,18 @@
         }
       };
       var import_konva9 = __toESM2(require_lib());
+      var import_touchsweep = __toESM2(require_touchsweep());
+      function addGestureHandlers(node, handler) {
+        const add = (name) => node.addEventListener(name, (event) => {
+          const e = event;
+          handler(name, new Posn6(e.detail.endX, e.detail.endY));
+        });
+        new import_touchsweep.default(node, {}, 20);
+        add("swipeleft");
+        add("swiperight");
+        add("swipeup");
+        add("swipedown");
+      }
       var WorldEnd2 = class {
         constructor(isEnd, scene) {
           this.isEnd = isEnd;
@@ -12527,6 +12700,9 @@
           this.images.forEach(({ image, position }) => {
             const reusable = image.getReusableIds();
             const node = image.createNode(context);
+            if (node.parent) {
+              node.remove();
+            }
             if (reusable?.length) {
               context.nextNodeCache.addNode(image.getReusableIds(), node);
             }
@@ -12577,6 +12753,8 @@
         }
         onMouseReleased(pos) {
         }
+        onGesture(name, pos) {
+        }
         /**
          * Called if one of the other methods returns endOfWorld
          */
@@ -12597,6 +12775,7 @@
           window.addEventListener("keyup", (e) => {
             this.onKeyReleased(mapKey(e));
           });
+          addGestureHandlers(document.body, (name, pos) => this.onGesture(name, pos));
           this.layer = new import_konva9.default.Layer();
           this.stage.on("click", (e) => {
             const position = this.stage?.getPointerPosition();
@@ -14533,6 +14712,16 @@
           this.stats = new GameStats();
       }
     }
+    onGesture(name) {
+      this.onKeyEvent(
+        {
+          swipeleft: "ArrowLeft",
+          swiperight: "ArrowRight",
+          swipeup: "ArrowUp",
+          swipedown: "ArrowDown"
+        }[name]
+      );
+    }
     onKeyReleased(key) {
       switch (key) {
         case "down":
@@ -14594,3 +14783,21 @@
     console.error("Preload failed", error);
   });
 })();
+/*! Bundled license information:
+
+touchsweep/dist/touchsweep.js:
+  (*! *****************************************************************************
+      Copyright (c) Microsoft Corporation.
+  
+      Permission to use, copy, modify, and/or distribute this software for any
+      purpose with or without fee is hereby granted.
+  
+      THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+      REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+      AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+      INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+      LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+      OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+      PERFORMANCE OF THIS SOFTWARE.
+      ***************************************************************************** *)
+*/
